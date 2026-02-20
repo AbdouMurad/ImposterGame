@@ -11,11 +11,11 @@ payload = {
     "code" : 
 """
 def solve(x):
-    return x[0] + x[1]
+    return x + 10
 """,
     "tests" : [
-        { 'input': [1,2], 'expected': 3},
-        { 'input': [3,2], 'expected': 5},
+        { 'input': -10, 'expected': 0},
+        { 'input': 5, 'expected': 15},
     ]
 }
 

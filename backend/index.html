@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <input id="msg" placeholder="Type something" />
+    <button onclick="send()">Send</button>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8765");
+
+        socket.onopen = () => {
+        };
+        
+        socket.onmessage = (event) => {
+            console.log("Server:", event.data);
+        };
+        
+        function send() {
+            const value = document.getElementById("msg").value;
+    
+            socket.send(JSON.stringify({
+                type: "join-room",
+                name: "Abdou",
+                playerid: value,
+                roomid: value
+            }));
+        }
+    </script>
+</body>
+</html>
