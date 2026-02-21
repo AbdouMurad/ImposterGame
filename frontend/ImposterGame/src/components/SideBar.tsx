@@ -9,7 +9,7 @@ type SideBarProps = {
 
 export default function SideBar({ Users, HighlightedUser }: SideBarProps) {
     // TODO: Add call to socket for time here
-    const [time, setTime] = useState<Number>(120);
+    const [time] = useState<number>(120);
     return (
         <>
             <div className="w-[15%] bg-gray-900 my-3 mr-10 border-y-2 border-r-2 border-gray-700 rounded-r-xl">

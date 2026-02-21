@@ -10,14 +10,10 @@ export default function Game() {
     type Phase = "coding" | "voting"
     const [phase, setPhase] = useState<Phase>("coding");
     // TODO: Add users here
-    const [usernames, setUsernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
+    const [usernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
     // TODO: Add call to socket for highlighted user here
-    const [highlightedUser, setHighlightedUser] = useState<string>("Abdou");
-    const [code, setCode] = useState("// Start coding...");
-
-    const handleEditorChange = (value: string | undefined) => {
-        setCode(value || "");
-    };
+    const [highlightedUser] = useState<string>("Abdou");
+    // Editor state and change handler removed for now (placeholder content used)
 
     const runCode = () => {
         // Add logic to execute the code here
@@ -49,7 +45,6 @@ export default function Game() {
                             defaultLanguage="python"
                             defaultValue="// Start coding..."
                             theme="vs-dark"
-                            onChange={handleEditorChange}
                         />
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button
