@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from 'react-router-dom';
 import useWebSocket from "../../hooks/useWebSocket";
 
 export default function Lobby() {
   const wsUrl = "ws://localhost:8765"; // your backend server (use wss:// in production)
   const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
 
+  const location = useLocation();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [playerId] = useState(() => "p-" + Math.random().toString(36).slice(2, 9));
   const [name, setName] = useState("Player" + Math.floor(Math.random() * 1000));
@@ -12,6 +14,22 @@ export default function Lobby() {
   const [gameStarted, setGameStarted] = useState(false);
 
   const pollingRef = useRef<number | null>(null);
+
+  // if a roomid was provided in the URL (e.g. after creating a room), pick it up
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const rid = params.get("roomid");
+      if (rid) setRoomId(rid);
+    } catch {
+      // ignore
+    }
+  }, [location.search]);
+
+  // allow creating a room directly from the lobby if desired
+  function onCreateRoom() {
+    send({ type: "create-room", playerid: playerId, name });
+  }
 
   // handle incoming messages from the server
   useEffect(() => {
@@ -48,7 +66,7 @@ export default function Lobby() {
 
     // request player-list immediately and then poll every 2s
     const ask = () => {
-      if (connected && roomId) send({ type: "player-list", roomid: roomId });
+      if (connected && roomId) send({ type: "request-list", roomid: roomId });
     };
 
     ask();
@@ -62,10 +80,6 @@ export default function Lobby() {
     };
   }, [roomId, connected, send]);
 
-  function onCreateRoom() {
-    // server expects: {"type":"create-room","playerid":..., "name":...}
-    send({ type: "create-room", playerid: playerId, name });
-  }
 
   function onStartGame() {
     if (!roomId) return;
@@ -99,23 +113,10 @@ export default function Lobby() {
       {/* left panel: create room and controls */}
       <div className="IdStartButtonContainer" style={{ flex: "0 0 70%", padding: 24 }}>
         <div style={{ width: "100%", maxWidth: 900 }}>
-          <h1 style={{ color: "#fff", fontSize: 28, marginBottom: 12 }}>Start / Room ID</h1>
+          <h1 style={{ color: "#fff", fontSize: 28, marginBottom: 12 }}>Start</h1>
 
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              style={{ padding: 8, borderRadius: 6, border: "1px solid #333", background: "#0b1220", color: "#fff" }}
-            />
-
-            <button
-              onClick={onCreateRoom}
-              disabled={!connected || !!roomId}
-              style={{ padding: "0.75rem 1rem", borderRadius: 8, background: "#7c3aed", color: "#fff", border: "none" }}
-            >
-              Create Room
-            </button>
+          
 
             <div style={{ color: "#d1d5db", alignSelf: "center" }}>{connected ? "Connected" : "Disconnected"}</div>
           </div>
@@ -125,13 +126,33 @@ export default function Lobby() {
               <strong style={{ color: "#d1d5db" }}>Room ID:</strong>
               <div style={{ marginTop: 6, padding: 12, background: "#0b1220", color: "#fff", display: "inline-flex", gap: 8, alignItems: "center", borderRadius: 6 }}>
                 <span style={{ fontFamily: "monospace", fontSize: 18 }}>{roomId}</span>
-                <button onClick={copyRoomCode} style={{ padding: "6px 10px", borderRadius: 6, background: "#374151", color: "#fff", border: "none" }}>Copy</button>
+                <button onClick={copyRoomCode} style={{ cursor: 'pointer', padding: "6px 10px", borderRadius: 6, background: "#374151", color: "#fff", border: "none" }}>Copy</button>
               </div>
             </div>
           )}
+          {/* right panel: informational */}
+          <div className="LobbyContainer" style={{ flex: "0 0 30%", padding: 24, backgroundColor: "#1f2937" }}>
+            <div style={{ textAlign: "center" }}>
+              <h2 style={{ color: "#fff", fontSize: 20, marginBottom: 8 }}>Lobby</h2>
+              <p style={{ color: "#d1d5db" }}>Share the room code with friends so they can join the game.</p>
+              {roomId && <p style={{ color: "#d1d5db", marginTop: 12 }}>Players are listed on the left and refresh automatically.</p>}
+            </div>
+          </div>
+          
 
-          {/* Player list */}
-          <div style={{ marginTop: 20 }}>
+          {/* Start game button */}
+          <div style={{ marginTop: 16 }}>
+            <button onClick={onStartGame} disabled={!roomId || gameStarted} style={{ cursor: 'pointer', padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}>
+              {gameStarted ? "Game started" : "Start Game"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+
+      {/* Player list */}
+          <div style={{ marginRight: 50, padding: 24 }}>
             <h3 style={{ color: "#fff", marginBottom: 8 }}>Players</h3>
             <div style={{ background: "#0b1220", padding: 12, borderRadius: 8, minHeight: 80, color: "#fff" }}>
               {players.length === 0 ? (
@@ -145,24 +166,6 @@ export default function Lobby() {
               )}
             </div>
           </div>
-
-          {/* Start game button */}
-          <div style={{ marginTop: 16 }}>
-            <button onClick={onStartGame} disabled={!roomId || gameStarted} style={{ padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}>
-              {gameStarted ? "Game started" : "Start Game"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* right panel: informational */}
-      <div className="LobbyContainer" style={{ flex: "0 0 30%", padding: 24, backgroundColor: "#1f2937" }}>
-        <div style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#fff", fontSize: 20, marginBottom: 8 }}>Lobby</h2>
-          <p style={{ color: "#d1d5db" }}>Share the room code with friends so they can join the game.</p>
-          {roomId && <p style={{ color: "#d1d5db", marginTop: 12 }}>Players are listed on the left and refresh automatically.</p>}
-        </div>
-      </div>
     </div>
   );
 }
