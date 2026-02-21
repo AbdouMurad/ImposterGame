@@ -4,6 +4,8 @@ import json
 import random
 import string
 from backend.game import Game
+from backend.sockets.runner import Engine
+
 rooms = {} #ket = roomid, value = Game
 clients = {} # key = playerid, value = websocket
 
@@ -150,6 +152,7 @@ async def handler(websocket):
 
             game = rooms[roomid]
             await websocket.send(json.dumps(game.getListOfTurns()))
+            
         elif msg_type == "run-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
@@ -157,10 +160,6 @@ async def handler(websocket):
             game = rooms[roomid]
             if game.state == "in-progress":
                 source_code = data.get("source-code", None)
-
-                
-
-
 
         elif msg_type == "request-time":
             roomid = data.get("roomid", None)
@@ -176,10 +175,7 @@ async def handler(websocket):
                 "playerid": playerid,
                 "currentPlayer": currentPlayer,
                 "timeLeft": timeLeft
-
             }))
-
-
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 

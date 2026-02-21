@@ -4,6 +4,7 @@
     <input id="roomid" placeholder="id" />
     <input id="name" placeholder="name" />
     <button onclick="send()">Send</button>
+    <button onclick="createRoom()">Create Room</button>
     <button onclick="getSourceCode()">Source Code</button>
     <button onclick="startGame()">Start Game</button>
 
@@ -36,6 +37,15 @@
                 name: name,
                 playerid: value,
                 roomid: value
+            }));
+        }
+        function createRoom() {
+            const name = document.getElementById("name").value;
+
+            socket.send(JSON.stringify({
+                type: "create-room",
+                name: name,
+                playerid: 123,
             }));
         }
         function send() {
