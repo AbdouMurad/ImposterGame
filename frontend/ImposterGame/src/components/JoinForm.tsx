@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useWebSocket from "../hooks/useWebSocket";
+import { useWS } from "../contexts/WebSocketContext";
 
 type JoinFormProps = {
   onCancelJoinClick: () => void;
 };
 
 export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
-  const wsUrl = "ws://localhost:8765";
-  const { send, connected, lastMessage, error } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
+  const { send, connected, lastMessage, error } = useWS();
 
   const [username, setUsername] = useState("");
   const [joinCode, setJoinCode] = useState("");

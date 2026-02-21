@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import useWebSocket from "../hooks/useWebSocket";
+import { useWS } from "../contexts/WebSocketContext";
 import { useNavigate } from "react-router-dom";
 
 type CreateFormProps = {
@@ -7,8 +7,7 @@ type CreateFormProps = {
 };
 
 export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
-  const wsUrl = "ws://localhost:8765";
-  const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
+  const { send, connected, lastMessage } = useWS();
   const [roomId, setRoomId] = useState<string | null>(null);
   // removed: const [gameStarted, setGameStarted] = useState(false);
 
