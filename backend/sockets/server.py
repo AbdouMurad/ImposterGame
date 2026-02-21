@@ -145,6 +145,24 @@ async def handler(websocket):
                 "code": source_code
             }))
 
+        elif msg_type == "request-time":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            timeLeft = game.timer.getTimeLeft()
+            currentPlayer = game.currentPlayer
+            
+            await websocket.send(json.dumps({
+                "type": "time-left",
+                "roomid": roomid,
+                "playerid": playerid,
+                "currentPlayer": currentPlayer,
+                "timeLeft": timeLeft
+
+            }))
+
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 

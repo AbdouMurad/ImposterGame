@@ -1,11 +1,25 @@
 import random
 import json
+import time
 
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
         self.code = code
 
+class Timer:
+    def __init__(self, duration):
+        self.duration = duration
+
+    def startTime(self):
+        self.start_time = time.time()        
+
+    def getTime(self):
+        return time.time() - self.start_time
+    
+    def getTimeLeft(self):
+        return round(self.duration - self.getTime())
+        
 class Game:
     def __init__(self, gameId):
         self.state = "waiting"
@@ -23,15 +37,14 @@ class Game:
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
-        self.sourceCode.append(commit)
-        return commit
+        self.sourceCode.append([commit.playerid, commit.code])
+        return self.sourceCode
 
     def startGame(self):
         self.state = "initializing"
 
-       # self.assignRoles()
-       # self.assignTurns()
-
+        self.assignRoles()
+        self.assignTurns()
         self.getQuestion()
         self.state = "in-progress"
 
@@ -67,6 +80,12 @@ class Game:
 
         self.currentPlayer = root
 
+    def switchTurns(self):
+        self.currentPlayer.active = False
+        self.currentPlayer = self.currentPlayer.next
+        self.currentPlayer.active = True
+        return self.currentPlayer
+
     def nextPlayer(self):
         if self.currentPlayer:
             self.currentPlayer = self.currentPlayer.next
@@ -98,8 +117,19 @@ class Game:
         self.questionStarterCode = question["starter_code"]      
 
         return question
+    
     def getSourceCode(self):
         return self.sourceCode[len(self.sourceCode)-1].code
+    
+    def getTestCases(self):
+        filePath = 'backend/test_questions/questions.json'
+
+        with open(filePath) as f:
+            data = json.load(f)
+        
+        
+        return 
+
     
     def selectQuestion(self,Id):
         filePath = 'backend/test_questions/questions.json'
@@ -132,7 +162,6 @@ class Game:
             "players": [player.userName for player in self.players]
         }
 
-
 class Node:
     def __init__(self):
         self.next = None
@@ -157,15 +186,11 @@ class Player(Node):
 if __name__ == "__main__":
     game = Game("game1")
 
-    # Test getQuestion - randomly chosen
-    print("=== Get Question (Random) ===")
-    question = game.getQuestion()
-    print(question["title"])
-    print(question["difficulty"])
-    print(question["description"])
-    print(question["examples"])
-    print(question["starter_code"])
+    # Simulate commits from different players
+    game.commit("alice", "commit 1")
+    game.commit("bob", "commit 2")
+    game.commit("alice", "commit 3")
 
-
-
-
+    # Print full history in order
+    commits = game.sourceCode
+    print(commits)

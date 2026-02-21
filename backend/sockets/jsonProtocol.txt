@@ -27,6 +27,12 @@ Frontend -> Backend:
         name
         roomid
 
+    #request the time
+    request-time
+        roomid
+        playerid
+        
+
     #request most recent source code of quesiton (only after game has started)
     request-code
         playerid
@@ -62,3 +68,10 @@ Backend -> Frontend
         questionExamples
         questtionStarterCode
         code
+
+    #response to request-time
+    time-left
+        roomid
+        playerdid
+        currentPlayer
+        timeLeft
