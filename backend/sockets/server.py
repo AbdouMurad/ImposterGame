@@ -115,7 +115,8 @@ async def handler(websocket):
                 "type": "game-started",
                 "roomid": roomid
             }
-            await websocket.send(json.dumps(startResponse))
+            await game.emit(startResponse)
+
             
         elif msg_type == "request-list":
             roomid = data.get("roomid", None)
