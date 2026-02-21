@@ -41,16 +41,16 @@ export default function Welcome() {
                     <button
                         type="button"
                         onClick={() => setIsJoinOpen(true)}
-                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300">
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
                         Join Room
                     </button>
-                    <Link to="/GameRoom/lobby">
-                        <button
-                            type="button"
-                            className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300">
-                            Create Room
-                        </button>
-                    </Link>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsCreateOpen(true)}
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
+                        Create Room
+                    </button>
 
                 </div>
             </div>

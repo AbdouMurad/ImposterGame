@@ -8,8 +8,6 @@ export default function Lobby() {
 
   const location = useLocation();
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [playerId] = useState(() => "p-" + Math.random().toString(36).slice(2, 9));
-  const [name, setName] = useState("Player" + Math.floor(Math.random() * 1000));
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
 
@@ -26,10 +24,11 @@ export default function Lobby() {
     }
   }, [location.search]);
 
-  // allow creating a room directly from the lobby if desired
-  function onCreateRoom() {
-    send({ type: "create-room", playerid: playerId, name });
-  }
+  // one-shot sync: request the current player list when we have a roomId and the socket is connected
+  useEffect(() => {
+    if (!roomId || !connected) return;
+    send({ type: "request-list", roomid: roomId });
+  }, [roomId, connected, send]);
 
   // handle incoming messages from the server
   useEffect(() => {
@@ -60,25 +59,25 @@ export default function Lobby() {
     }
   }, [lastMessage]);
 
-  // start polling player list once we have a room ID
-  useEffect(() => {
-    if (!roomId) return;
+  // // start polling player list once we have a room ID
+  // useEffect(() => {
+  //   if (!roomId) return;
 
-    // request player-list immediately and then poll every 2s
-    const ask = () => {
-      if (connected && roomId) send({ type: "request-list", roomid: roomId });
-    };
+  //   // request player-list immediately and then poll every 2s
+  //   const ask = () => {
+  //     if (connected && roomId) send({ type: "request-list", roomid: roomId });
+  //   };
 
-    ask();
-    pollingRef.current = window.setInterval(ask, 2000);
+  //   ask();
+  //   pollingRef.current = window.setInterval(ask, 2000);
 
-    return () => {
-      if (pollingRef.current) {
-        window.clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
-  }, [roomId, connected, send]);
+  //   return () => {
+  //     if (pollingRef.current) {
+  //       window.clearInterval(pollingRef.current);
+  //       pollingRef.current = null;
+  //     }
+  //   };
+  // }, [roomId, connected, send]);
 
 
   function onStartGame() {
@@ -110,38 +109,23 @@ export default function Lobby() {
         overflowX: "hidden",
       }}
     >
-      {/* left panel: create room and controls */}
-      <div className="IdStartButtonContainer" style={{ flex: "0 0 70%", padding: 24 }}>
+      {/* left: controls (70%) */}
+      <div className="IdStartButtonContainer" style={{ flex: "0 0 70%", padding: 32, boxSizing: 'border-box' }}>
         <div style={{ width: "100%", maxWidth: 900 }}>
           <h1 style={{ color: "#fff", fontSize: 28, marginBottom: 12 }}>Start</h1>
 
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          
-
-            <div style={{ color: "#d1d5db", alignSelf: "center" }}>{connected ? "Connected" : "Disconnected"}</div>
-          </div>
 
           {roomId && (
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 20 }}>
               <strong style={{ color: "#d1d5db" }}>Room ID:</strong>
-              <div style={{ marginTop: 6, padding: 12, background: "#0b1220", color: "#fff", display: "inline-flex", gap: 8, alignItems: "center", borderRadius: 6 }}>
+              <div style={{ marginTop: 8, padding: 12, background: "#0b1220", color: "#fff", display: "inline-flex", gap: 8, alignItems: "center", borderRadius: 6 }}>
                 <span style={{ fontFamily: "monospace", fontSize: 18 }}>{roomId}</span>
                 <button onClick={copyRoomCode} style={{ cursor: 'pointer', padding: "6px 10px", borderRadius: 6, background: "#374151", color: "#fff", border: "none" }}>Copy</button>
               </div>
             </div>
           )}
-          {/* right panel: informational */}
-          <div className="LobbyContainer" style={{ flex: "0 0 30%", padding: 24, backgroundColor: "#1f2937" }}>
-            <div style={{ textAlign: "center" }}>
-              <h2 style={{ color: "#fff", fontSize: 20, marginBottom: 8 }}>Lobby</h2>
-              <p style={{ color: "#d1d5db" }}>Share the room code with friends so they can join the game.</p>
-              {roomId && <p style={{ color: "#d1d5db", marginTop: 12 }}>Players are listed on the left and refresh automatically.</p>}
-            </div>
-          </div>
-          
 
-          {/* Start game button */}
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 24 }}>
             <button onClick={onStartGame} disabled={!roomId || gameStarted} style={{ cursor: 'pointer', padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}>
               {gameStarted ? "Game started" : "Start Game"}
             </button>
@@ -149,23 +133,28 @@ export default function Lobby() {
         </div>
       </div>
 
+      {/* right: lobby / players (30%) */}
+      <div className="LobbyContainer" style={{ flex: "0 0 30%", padding: 24, backgroundColor: "#0f1724", boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: 320, margin: '0 auto' }}>
+          <h2 style={{ color: "#fff", fontSize: 20, marginBottom: 8 }}>Lobby</h2>
+          <p style={{ color: "#9ca3af", marginBottom: 12 }}>Share the room code with friends so they can join the game.</p>
 
-
-      {/* Player list */}
-          <div style={{ marginRight: 50, padding: 24 }}>
+          <div style={{ marginTop: 12 }}>
             <h3 style={{ color: "#fff", marginBottom: 8 }}>Players</h3>
-            <div style={{ background: "#0b1220", padding: 12, borderRadius: 8, minHeight: 80, color: "#fff" }}>
+            <div style={{ background: "#0b1220", padding: 12, borderRadius: 8, minHeight: 120, color: "#fff" }}>
               {players.length === 0 ? (
                 <div style={{ color: "#9ca3af" }}>No players yet</div>
               ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {players.map((p) => (
-                    <li key={p} style={{ padding: "6px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{p}</li>
+                    <li key={p} style={{ padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{p}</li>
                   ))}
                 </ul>
               )}
             </div>
           </div>
+        </div>
+      </div>
     </div>
   );
 }
