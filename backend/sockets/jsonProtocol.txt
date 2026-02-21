@@ -44,11 +44,21 @@ Frontend -> Backend:
         name
         roomid
 
+    #request the tests cases for the given question
+    request-tests
+        playerid
+        roomid
+
     run-test
         playerid
         name
         roomid
         source-code
+
+    request-logs
+        playerid
+        name
+        roomid
 
 Backend -> Frontend
 
@@ -88,6 +98,20 @@ Backend -> Frontend
     #response to request-time
     time-left
         roomid
-        playerdid
+        playerid
         currentPlayer
         timeLeft
+
+    #response to request-tests
+    test-cases
+        roomid
+        playerid
+        tests
+
+    #response to request-logs
+    commit-logs
+        roomid
+        playerid
+        commits : [
+            [ playername , code] , [...], [...]
+        ]
