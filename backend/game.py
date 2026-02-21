@@ -74,10 +74,11 @@ class Game:
         )  
         self.players.append(player)
 
+        await self.emit(self.getListOfPlayers())
 
+    async def emit(self, message):
         for player in self.players:
-            print("SENDING TO ", player.userName)
-            await player.websocket.send(json.dumps(self.getListOfPlayers()))
+            await player.websocket.send(json.dumps(message))
 
     def assignRoles(self):
         for player in self.players:
@@ -149,7 +150,7 @@ class Game:
         self.questionFuncName = question["function_name"]
         self.questionParameters.append(question["parameters"])
         return question
-    
+
     def getSourceCode(self):
         print(self.sourceCode)
         return self.sourceCode[len(self.sourceCode)-1][1]
