@@ -43,6 +43,9 @@ class Game:
         )  
         self.players.append(player)
 
+        for player in self.players:
+            player.websocket.send(json.dumps(self.getListOfPlayers()))
+
     def assignRoles(self):
         for player in self.players:
             player.role = "crewmate"
@@ -122,6 +125,12 @@ class Game:
         self.questionExample = question["examples"]
         self.questionStarterCode = question["starter_code"]
         return question
+
+    def getListOfPlayers(self):
+        return {
+            "type": "player-list",
+            "players": [player.userName for player in self.players]
+        }
 
 
 class Node:
