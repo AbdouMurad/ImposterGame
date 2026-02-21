@@ -42,6 +42,8 @@ Backend -> Frontend
     #response to join-room
     player-joined   
         roomid
+        playerid
+        name
     
     #response to start-game
     game-started

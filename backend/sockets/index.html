@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <input id="msg" placeholder="Type something" />
+    <input id="roomid" placeholder="id" />
+    <input id="name" placeholder="name" />
     <button onclick="send()">Send</button>
     <button onclick="getSourceCode()">Source Code</button>
     <button onclick="startGame()">Start Game</button>
@@ -16,31 +17,34 @@
             console.log("Server:", event.data);
         };
         function getSourceCode() {
-            const value = document.getElementById("msg").value;
+            const value = document.getElementById("roomid").value;
+            const name = document.getElementById("name").value;
 
             socket.send(JSON.stringify({
                 type: "request-code",
-                name: "Abdou",
+                name: name,
                 playerid: value,
                 roomid: value
             }));
         }
         function startGame() {
-            const value = document.getElementById("msg").value;
+            const value = document.getElementById("roomid").value;
+            const name = document.getElementById("name").value;
 
             socket.send(JSON.stringify({
                 type: "start-game",
-                name: "Abdou",
+                name: name,
                 playerid: value,
                 roomid: value
             }));
         }
         function send() {
-            const value = document.getElementById("msg").value;
+            const value = document.getElementById("roomid").value;
+            const name = document.getElementById("name").value;
     
             socket.send(JSON.stringify({
                 type: "join-room",
-                name: "Abdou",
+                name: name,
                 playerid: value,
                 roomid: value
             }));

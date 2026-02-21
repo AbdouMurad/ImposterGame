@@ -72,7 +72,7 @@ async def handler(websocket):
             clients[playerid] = websocket
 
             if not check_room(roomid):
-                print("no room found")
+                print("no room found", roomid)
                 continue
             game = rooms[roomid]
 
@@ -88,7 +88,9 @@ async def handler(websocket):
 
             joinResponse = {
                 "type": "player-joined",
-                "roomid": roomid
+                "roomid": roomid,
+                "playerid": playerid,
+                "name": name
             }
 
             await websocket.send(json.dumps(joinResponse))
@@ -125,11 +127,7 @@ async def handler(websocket):
 
             game = rooms[roomid]
 
-            playerListResponse = {
-                "type": "player-list",
-                "players": [player.userName for player in game.players]
-            }
-            await websocket.send(json.dumps(playerListResponse))
+            await websocket.send(json.dumps(game.getListOfPlayers()))
         elif msg_type == "request-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
@@ -152,8 +150,6 @@ async def main():
         
         game1 = create_room("123")
         print(game1.gameId)
-        game1.addPlayer("123", "websocket", "Lem")
-        game1.addPlayer("123", "websocket", "Abdou")
         print("Running on ws://localhost:8765")
         await asyncio.Future()  # run forever
 
