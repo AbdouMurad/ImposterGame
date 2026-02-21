@@ -130,7 +130,8 @@ class Game:
         return question
     
     def getSourceCode(self):
-        return self.sourceCode[len(self.sourceCode)-1].code
+        print(self.sourceCode)
+        return self.sourceCode[len(self.sourceCode)-1][1]
     
     def getTests(self):
         filePath = 'backend/test_questions/testcases.json'
@@ -138,6 +139,7 @@ class Game:
         with open(filePath) as f:
             data = json.load(f)
 
+        print("QUESTION ID: ", self.questionId)
         tests = data.get(str(self.questionId)).get("tests")  
         return tests
 

@@ -175,7 +175,7 @@ async def handler(websocket):
                 "timeLeft": timeLeft
             }))
 
-        elif msg_type == " request-tests":
+        elif msg_type == "request-tests":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
 
