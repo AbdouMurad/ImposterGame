@@ -8,11 +8,11 @@ import { useState } from "react";
 
 export default function Game() {
     type Phase = "coding" | "voting"
-    const [phase, setPhase] = useState<Phase>("coding");
+    const [phase, setPhase] = useState<Phase>("voting");
     // TODO: Add users here
     const [usernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
     // TODO: Add call to socket for highlighted user here
-    const [highlightedUser] = useState<string>("Abdou");
+    const [highlightedUser, setHighlightedUser] = useState<string>("Abdou");
     // Editor state and change handler removed for now (placeholder content used)
 
     const runCode = () => {
