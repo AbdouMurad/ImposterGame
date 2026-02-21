@@ -6,7 +6,10 @@
             "difficulty": "Medium",
             "description": "Given the root of a binary tree, determine if it is a valid binary search tree (BST).\n\nA valid BST is defined as follows:\n\n- The left subtree of a node contains only nodes with keys strictly less than the node's key.\n- The right subtree of a node contains only nodes with keys strictly greater than the node's key.\n- Both the left and right subtrees must also be binary search trees.\n",
             "examples": "Example 1:\nInput: root = [2,1,3]\nOutput: true\n\nExample 2:\nInput: root = [5,1,4,null,null,3,6]\nOutput: false\nExplanation: The root node's value is 5 but its right child's value is 4.\n\nConstraints:\n- The number of nodes in the tree is in the range [1, 10^4].\n- -2^31 <= Node.val <= 2^31 - 1",
-            "starter_code": "def isValidBST(root):\n    # Write your solution here\n    pass"
+            "starter_code": "def isValidBST(root):\n    # Write your solution here\n    pass",
+            "function_name": "isValidBST",
+            "parameters": ["root"]
+            
         },
 
         {
@@ -15,7 +18,9 @@
             "difficulty": "Easy",
             "description": "Given the root of a binary tree, return the length of the diameter of the tree.\n\nThe diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.\n\nThe length of a path between two nodes is represented by the number of edges between them.\n",
             "examples": "Example 1:\nInput: root = [1,2,3,4,5]\nOutput: 3\nExplanation: 3 is the length of the path [4,2,1,3] or [5,2,1,3].\n\nExample 2:\nInput: root = [1,2]\nOutput: 1\n\nConstraints:\n- The number of nodes in the tree is in the range [1, 10^4].\n- -100 <= Node.val <= 100",
-            "starter_code": "def diameterOfBinaryTree(root):\n    # Write your solution here\n    pass"
+            "starter_code": "def diameterOfBinaryTree(root):\n    # Write your solution here\n    pass",
+            "function_name": "diameterOfBinaryTree",
+            "parameters": ["root"]
         },
 
         {
@@ -24,7 +29,9 @@
             "difficulty": "Easy",
             "description": "Given the root of a binary tree, return the length of the diameter of the tree.\nThe diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.\nThe length of a path between two nodes is represented by the number of edges between them.\n",
             "examples": "Example 1:\nInput: root = [1,2,3,4,5]\nOutput: 3\nExplanation: 3 is the length of the path [4,2,1,3] or [5,2,1,3].\n\nExample 2:\nInput: root = [1,2]\nOutput: 1\n\nConstraints:\n- The number of nodes in the tree is in the range [1, 10^4].\n- -100 <= Node.val <= 100",
-            "starter_code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    # Write your solution here\n    for pos, nums in list:\n        pass"
+            "starter_code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    # Write your solution here\n    for pos, nums in list:\n        pass",
+            "function_name": "twoSum",
+            "parameters": ["nums", "target"]
         
         },
 
@@ -34,7 +41,9 @@
             "difficulty": "Medium",
             "description": "Given a string s of '(' , ')' and lowercase English characters.\nYour task is to remove the minimum number of parentheses ( '(' or ')', in any positions ) so that the resulting parentheses string is valid and return any valid string.\nFormally, a parentheses string is valid if and only if:\n- It is the empty string, contains only lowercase characters, or\n- It can be written as AB (A concatenated with B), where A and B are valid strings, or\n- It can be written as (A), where A is a valid string.\n",
             "examples": "Example 1:\nInput: s = \"lee(t(c)o)de)\"\nOutput: \"lee(t(c)o)de\"\nExplanation: \"lee(t(co)de)\" , \"lee(t(c)ode)\" would also be accepted.\nExample 2:\nInput: s = \"a)b(c)d\"\nOutput: \"ab(c)d\"\nExample 3:\nInput: s = \"))((\"\nOutput: \"\"\nExplanation: An empty string is also valid.\n\nConstraints:\n- 1 <= s.length <= 10^5\n- s[i] is either '(' , ')', or lowercase English letter.",
-            "starter_code": "def minRemoveToMakeValid(self, s: str) -> str:"
+            "starter_code": "def minRemoveToMakeValid(self, s: str) -> str:",
+            "function_name": "minRemoveToMakeValid",
+            "parameters": ["s"]
 
         },
 
@@ -44,7 +53,9 @@
             "difficulty": "Easy", 
             "description": "Given a binary tree, determine if it is height-balanced.\n",
             "examples": "Example 1:\nInput: root = [3,9,20,null,null,15,7]\nOutput: true\nExample 2:\nInput: root = [1,2,2,3,3,null,null,4,4]\nOutput: false\nExample 3:\nInput: root = []\nOutput: true\n\nConstraints:\n- The number of nodes in the tree is in the range [0, 5000].\n- -10^4 <= Node.val <= 10^4",
-            "starter_code": "def isBalanced(self, root Optional[TreeNode]) -> bool:"
+            "starter_code": "def isBalanced(self, root Optional[TreeNode]) -> bool:",
+            "function_name": "isBalanced",
+            "parameters": ["root"]
 
 
         },
@@ -55,7 +66,9 @@
             "difficulty": "Medium",
             "description": "Solve a given equation and return the value of 'x' in the form of a string \"x=#value\". The equation contains only '+', '-' operation, the variable 'x' and its coefficient. You should return \"No solution\" if there is no solution for the equation, or \"Infinite solutions\" if there are infinite solutions for the equation.\n\nIf there is exactly one solution for the equation, we ensure that the value of 'x' is an integer.\n",
             "examples": "Example 1:\nInput: equation = \"x+5-3+x=6+x-2\"\nOutput: \"x=2\"\nExample 2:\nInput: equation = \"x=x\"\nOutput: \"Infinite solutions\"\nExample 3:\nInput: equation = \"2x=x\"\nOutput: \"x=0\"\n\nConstraints:\n- 3 <= equation.length <= 1000\n- equation has exactly one '='.\n- equation consists of integers with an absolute value in the range [0, 100] without any leading zeros, and the variable 'x'.\n- The input is generated such that if there is a single solution, it will be an integer.",
-            "starter_code": "def solveEquation(self, equation: st_ -> str:"
+            "starter_code": "def solveEquation(self, equation: st_ -> str:",
+            "function_name": "solveEquation",
+            "parameters": ["equation"]
 
         },
 
@@ -65,7 +78,9 @@
             "difficulty": "Medium",
             "description": "The encoding rule is: k[encoded_string], where the encoded_string inside the square brackets is being repeated exactly k times. Note that k is guaranteed to be a positive integer.\nYou may assume that the input string is always valid; there are no extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, k.\nFor example, there will not be input like 3a or 2[4].\nThe test cases are generated so that the length of the output will never exceed 10^5.\n", 
             "examples": "Example 1:\nInput: s = \"3[a]2[bc]\"\nOutput: \"aaabcbc\"\nExample 2:\nInput: s = \"3[a2[c]]\"\nOutput: \"accaccacc\"\nExample 3:\nInput: s = \"2[abc]3[cd]ef\"\nOutput: \"abcabccdcdcdef\"\n\nConstraints:\n- 1 <= s.length <= 30\n- s consists of lowercase English letters, digits, and square brackets '[]'.\n- s is guaranteed to be a valid input.\n- All the integers in s are in the range [1, 300].",
-            "starter_code": "def decodeString(self, s: str) -> str:"
+            "starter_code": "def decodeString(self, s: str) -> str:",
+            "function_name": "decodeString",
+            "parameters": ["s"]
         
         }
     ]

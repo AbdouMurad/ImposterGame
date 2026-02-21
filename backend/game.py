@@ -34,6 +34,8 @@ class Game:
         self.questionDesc = ""
         self.questionExample = ""
         self.questionStarterCode = ""
+        self.questionFuncName = ""
+        self.questionParameters = []
         self.sourceCode = []
         
         self.currentPlayer: Player = None
@@ -42,6 +44,19 @@ class Game:
         commit = Commit(playerid, code)
         self.sourceCode.append([commit.playerid, commit.code])
         return self.sourceCode
+    
+    def getCommitLogs(self):
+        commitLogs = {
+            "Commits":[] #[self.sourceCode[i][0], self.sourceCode[i][1]] for i in range(len(self.sourceCode))
+        }
+        for i in range(len(self.sourceCode)):
+            commitLogs["Commits"].append([
+                self.sourceCode[i][0],
+                self.sourceCode[i][1]
+            ]
+        )   
+           
+        return commitLogs
 
     def startGame(self):
         self.state = "initializing"
@@ -49,7 +64,6 @@ class Game:
         self.assignRoles()
         self.assignTurns()
         self.getQuestion()
-        print(self.questionDesc)
         self.state = "in-progress"
 
     async def addPlayer(self, id, websocket, name):
@@ -71,7 +85,11 @@ class Game:
             player.role = "crewmate"
 
         temp = self.players
-        print(temp)
+        if len(self.players) == 1:
+                imposter = temp[0]
+                imposter.role = "imposter"
+                return imposter
+        
         imposter = temp[random.randrange(0, len(temp))]
         imposter.role = "imposter"
         return imposter
@@ -114,7 +132,9 @@ class Game:
                 "difficulty": q["difficulty"],
                 "description": q["description"],
                 "examples": q["examples"],
-                "starter_code": q["starter_code"]
+                "starter_code": q["starter_code"],
+                "function_name": q["function_name"],
+                "parameters": q["parameters"]
             } 
             for q in data["questions"]
         }
@@ -126,8 +146,9 @@ class Game:
         self.questionTitle = question["title"]
         self.questionDesc = question["description"]
         self.questionExample = question["examples"]
-        self.questionStarterCode = question["starter_code"]      
-
+        self.questionStarterCode = question["starter_code"]    
+        self.questionFuncName = question["function_name"]
+        self.questionParameters.append(question["parameters"])
         return question
 
     def getSourceCode(self):
@@ -140,7 +161,6 @@ class Game:
         with open(filePath) as f:
             data = json.load(f)
 
-        print("QUESTION ID: ", self.questionId)
         tests = data.get(str(self.questionId)).get("tests")  
         return tests
 
@@ -206,6 +226,6 @@ class Player(Node):
 
 if __name__ == "__main__":
     game = Game("game1")
-    game.selectQuestion(1)
-    tests = game.getTests()
-    print(tests)
+    game.getQuestion()
+    print("Function Name:", game.questionFuncName)
+    print("Parameters", game.questionParameters)

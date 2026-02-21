@@ -57,7 +57,6 @@ Frontend -> Backend:
 
     request-logs
         playerid
-        name
         roomid
 
 Backend -> Frontend
