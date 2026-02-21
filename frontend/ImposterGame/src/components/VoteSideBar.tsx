@@ -34,7 +34,7 @@ export default function VoteBar({ Users, HighlightedUser, HandleCardClick }: Vot
                 <div className="flex justify-end">
                     <button
                         onClick={castVote}
-                        className="cursor-pointer w-20 m-2 mt-60 p-3 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-900 transition-colors duration-300"
+                        className="cursor-pointer w-20 m-2 mt-60 p-3 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300"
                     >
                         Vote
                     </button>

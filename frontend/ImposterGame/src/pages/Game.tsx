@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export default function Game() {
     type Phase = "coding" | "voting"
-    const [phase, setPhase] = useState<Phase>("voting");
+    const [phase, setPhase] = useState<Phase>("coding");
     // TODO: Add users here
     const [usernames, setUsernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
     // TODO: Add call to socket for highlighted user here
