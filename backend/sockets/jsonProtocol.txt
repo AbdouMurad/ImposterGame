@@ -27,11 +27,23 @@ Frontend -> Backend:
         name
         roomid
 
+    #request list of players in order of turns
+    request-order
+        playerid 
+        name
+        roomid
+
     #request most recent source code of quesiton (only after game has started)
     request-code
         playerid
         name
         roomid
+
+    run-test
+        playerid
+        name
+        roomid
+        source-code
 
 Backend -> Frontend
 
@@ -49,10 +61,15 @@ Backend -> Frontend
     game-started
         roomid
     
-    #response to request-list
+
+    #response to request-list or emmited when new player joins room
     player-list
         players : [name1, name2, ...]
     
+    #response to request-turn 
+    turn-list
+        players : [name1, name2, ...]
+
     #response to request-code
     source-code
         questionId

@@ -7,6 +7,18 @@ import subprocess
 Setup test code and expected output/input. Create a temp directory and solution.py file which contains the code
 """
 
+
+class Engine:
+    def __init__(self, sourceCode, tests):
+        self.sourceCode = sourceCode
+        self.tests = tests
+    
+    def runTests(self):
+        tmpdir = tempfile.TemporaryDirectory()
+        solution_path = os.path.join(tmpdir.name, "solution.py")
+
+
+
 payload = {
     "code" : 
 """
