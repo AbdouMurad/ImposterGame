@@ -28,14 +28,13 @@ def check_room(room_id):
 
 async def handler(websocket):
     print("Client connected")
-
     async for message in websocket:
         try:
             data = json.loads(message)
         except json.JSONDecodeError:
             await websocket.send("Invalid JSON")
             continue
-
+        
         msg_type = data.get("type", None)
         if msg_type == "create-room":
             roomid = generate_random_id()
@@ -55,6 +54,11 @@ async def handler(websocket):
             except Exception as e:
                 print("Failed to send room-created message:", e)
 
+            createResponse = {
+                "type": "room-created",
+                "roomid": roomid
+            }
+            await websocket.send(json.dumps(createResponse))
 
         elif msg_type == "join-room":
             name = data.get("name", None)
@@ -81,10 +85,15 @@ async def handler(websocket):
                 websocket=websocket,
                 name=name
             )
-            print(f"{name} joined room {roomid}")
-            print(rooms)
 
-            await websocket.send(f"Welcome {name} to room {roomid}")
+            joinResponse = {
+                "type": "player-joined",
+                "roomid": roomid
+            }
+
+            await websocket.send(json.dumps(joinResponse))
+            print(joinResponse)
+
         elif msg_type == "start-game":
             roomid = data.get("roomid", None)
 
@@ -97,7 +106,42 @@ async def handler(websocket):
             game = rooms[roomid]
             game.startGame()
             print(f"Game in room {roomid} started")
+
+            startResponse = {
+                "type": "game-started",
+                "roomid": roomid
+            }
+            await websocket.send(json.dumps(startResponse))
             
+        elif msg_type == "player-list":
+            roomid = data.get("roomid", None)
+
+            if roomid is None:
+                await websocket.send("No room ID provided")
+                continue
+            if not check_room(roomid):
+                await websocket.send("Room not found")
+                continue
+
+            game = rooms[roomid]
+
+            playerListResponse = {
+                "type": "player-list",
+                "players": [player.userName for player in game.players]
+            }
+            await websocket.send(json.dumps(playerListResponse))
+        elif msg_type == "source-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+            
+            game = rooms[roomid]
+            source_code = game.getSourceCode()
+            await websocket.send(json.dumps({
+                "type": "source-code",
+                "question": game.question,
+                "code": source_code
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
@@ -106,6 +150,9 @@ async def main():
    
     async with websockets.serve(handler, "localhost", 8765):
         print(generate_random_id())
+        game1 = create_room("123")
+        game1.addPlayer("123", "websocket", "Lem")
+        game1.addPlayer("123", "websocket", "Abdou")
         print("Running on ws://localhost:8765")
         await asyncio.Future()  # run forever
 
