@@ -1,16 +1,33 @@
 import random
 import json
+import time
 
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
         self.code = code
 
+class Timer:
+    def __init__(self, duration):
+        self.duration = duration
+
+    def startTime(self):
+        self.start_time = time.time()        
+
+    def getTime(self):
+        return time.time() - self.start_time
+    
+    def getTimeLeft(self):
+        return round(self.duration - self.getTime())
+        
 class Game:
     def __init__(self, gameId):
         self.state = "waiting"
         self.gameId = gameId
         self.players = []
+
+        self.turns = []
+
         self.questionId = None
         self.questionTitle = ""
         self.questionDifficulty = ""
@@ -23,19 +40,19 @@ class Game:
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
-        self.sourceCode.append(commit)
-        return commit
+        self.sourceCode.append([commit.playerid, commit.code])
+        return self.sourceCode
 
     def startGame(self):
         self.state = "initializing"
 
-       # self.assignRoles()
-       # self.assignTurns()
-
+        self.assignRoles()
+        self.assignTurns()
         self.getQuestion()
+        print(self.questionDesc)
         self.state = "in-progress"
 
-    def addPlayer(self, id, websocket, name):
+    async def addPlayer(self, id, websocket, name):
         player = Player(
             id=id,
             websocket=websocket,
@@ -43,29 +60,43 @@ class Game:
         )  
         self.players.append(player)
 
+        await self.emit(self.getListOfPlayers())
+
+    async def emit(self, message):
         for player in self.players:
-            player.websocket.send(json.dumps(self.getListOfPlayers()))
+            await player.websocket.send(json.dumps(message))
 
     def assignRoles(self):
         for player in self.players:
             player.role = "crewmate"
 
         temp = self.players
-        imposter = temp[random.randrange(1, len(temp)+1)]
+        print(temp)
+        imposter = temp[random.randrange(0, len(temp))]
         imposter.role = "imposter"
         return imposter
+
 
     def assignTurns(self):
         random.shuffle(self.players)  
         root = self.players[0]
         current = root
+
+        self.turns = [root]
         
         for i in range(1, len(self.players)):
             current.next = self.players[i]
             current = current.next
+            self.turns.append(current)
         current.next = root
 
         self.currentPlayer = root
+
+    def switchTurns(self):
+        self.currentPlayer.active = False
+        self.currentPlayer = self.currentPlayer.next
+        self.currentPlayer.active = True
+        return self.currentPlayer
 
     def nextPlayer(self):
         if self.currentPlayer:
@@ -98,8 +129,21 @@ class Game:
         self.questionStarterCode = question["starter_code"]      
 
         return question
+
     def getSourceCode(self):
-        return self.sourceCode[len(self.sourceCode)-1].code
+        print(self.sourceCode)
+        return self.sourceCode[len(self.sourceCode)-1][1]
+    
+    def getTests(self):
+        filePath = 'backend/test_questions/testcases.json'
+
+        with open(filePath) as f:
+            data = json.load(f)
+
+        print("QUESTION ID: ", self.questionId)
+        tests = data.get(str(self.questionId)).get("tests")  
+        return tests
+
     
     def selectQuestion(self,Id):
         filePath = 'backend/test_questions/questions.json'
@@ -119,6 +163,7 @@ class Game:
         }
         question = questions.get(Id)
         self.commit("SYSTEM", question["starter_code"])
+        self.questionId = Id
         self.questionDifficulty = question["difficulty"]
         self.questionTitle = question["title"]
         self.questionDesc = question["description"]
@@ -131,7 +176,12 @@ class Game:
             "type": "player-list",
             "players": [player.userName for player in self.players]
         }
-
+    
+    def getListOfTurns(self):
+        return {
+            "type": "turn-list",
+            "players": [player.userName for player in self.turns]
+        }
 
 class Node:
     def __init__(self):
@@ -156,16 +206,6 @@ class Player(Node):
 
 if __name__ == "__main__":
     game = Game("game1")
-
-    # Test getQuestion - randomly chosen
-    print("=== Get Question (Random) ===")
-    question = game.getQuestion()
-    print(question["title"])
-    print(question["difficulty"])
-    print(question["description"])
-    print(question["examples"])
-    print(question["starter_code"])
-
-
-
-
+    game.selectQuestion(1)
+    tests = game.getTests()
+    print(tests)
