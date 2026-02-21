@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from 'react-router-dom';
 import useWebSocket from "../../hooks/useWebSocket";
 
@@ -10,8 +10,6 @@ export default function Lobby() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
-
-  const pollingRef = useRef<number | null>(null);
 
   // if a roomid was provided in the URL (e.g. after creating a room), pick it up
   useEffect(() => {

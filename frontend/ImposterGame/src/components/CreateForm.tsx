@@ -1,3 +1,4 @@
+// ...existing code...
 import { useEffect, useRef, useState } from "react";
 import useWebSocket from "../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +11,7 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
   const wsUrl = "ws://localhost:8765";
   const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [gameStarted, setGameStarted] = useState(false);
+  // removed: const [gameStarted, setGameStarted] = useState(false);
 
   const [name, setName] = useState("Player" + Math.floor(Math.random() * 1000));
   const pollingRef = useRef<number | null>(null);
@@ -40,9 +41,8 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
             navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(rid)}`);
           }
         }
-      } else if (t === "game-started") {
-        setGameStarted(true);
       }
+      // removed handling for "game-started" since this component doesn't need to track it
     }
   }, [lastMessage, waitingForCreate, navigate]);
 
@@ -107,5 +107,4 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
         </form>
       </div>
     </>
-  );
-}
+  )}

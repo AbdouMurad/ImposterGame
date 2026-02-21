@@ -60,7 +60,7 @@ export default function useWebSocket(
         }
       };
 
-      ws.onerror = (ev) => {
+      ws.onerror = () => {
         setError("WebSocket error");
       };
 

@@ -1,6 +1,5 @@
 import { Github } from "lucide-react";
 import { CircleQuestionMark } from "lucide-react";
-import { Link } from 'react-router-dom';
 
 import { useState } from "react";
 
