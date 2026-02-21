@@ -49,6 +49,7 @@ class Game:
         self.assignRoles()
         self.assignTurns()
         self.getQuestion()
+        print(self.questionDesc)
         self.state = "in-progress"
 
     async def addPlayer(self, id, websocket, name):
@@ -59,17 +60,19 @@ class Game:
         )  
         self.players.append(player)
 
+        await self.emit(self.getListOfPlayers())
 
+    async def emit(self, message):
         for player in self.players:
-            print("SENDING TO ", player.userName)
-            await player.websocket.send(json.dumps(self.getListOfPlayers()))
+            await player.websocket.send(json.dumps(message))
 
     def assignRoles(self):
         for player in self.players:
             player.role = "crewmate"
 
         temp = self.players
-        imposter = temp[random.randrange(1, len(temp)+1)]
+        print(temp)
+        imposter = temp[random.randrange(0, len(temp))]
         imposter.role = "imposter"
         return imposter
 
@@ -126,18 +129,20 @@ class Game:
         self.questionStarterCode = question["starter_code"]      
 
         return question
-    
+
     def getSourceCode(self):
-        return self.sourceCode[len(self.sourceCode)-1].code
+        print(self.sourceCode)
+        return self.sourceCode[len(self.sourceCode)-1][1]
     
-    def getTestCases(self):
-        filePath = 'backend/test_questions/questions.json'
+    def getTests(self):
+        filePath = 'backend/test_questions/testcases.json'
 
         with open(filePath) as f:
             data = json.load(f)
-        
-        
-        return 
+
+        print("QUESTION ID: ", self.questionId)
+        tests = data.get(str(self.questionId)).get("tests")  
+        return tests
 
     
     def selectQuestion(self,Id):
@@ -158,6 +163,7 @@ class Game:
         }
         question = questions.get(Id)
         self.commit("SYSTEM", question["starter_code"])
+        self.questionId = Id
         self.questionDifficulty = question["difficulty"]
         self.questionTitle = question["title"]
         self.questionDesc = question["description"]
@@ -200,12 +206,6 @@ class Player(Node):
 
 if __name__ == "__main__":
     game = Game("game1")
-
-    # Simulate commits from different players
-    game.commit("alice", "commit 1")
-    game.commit("bob", "commit 2")
-    game.commit("alice", "commit 3")
-
-    # Print full history in order
-    commits = game.sourceCode
-    print(commits)
+    game.selectQuestion(1)
+    tests = game.getTests()
+    print(tests)
