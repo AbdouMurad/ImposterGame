@@ -13,8 +13,8 @@ class Game:
 
     def startGame(self):
         self.state = "initializing"
-        self.assignRoles()
-        self.assignTurns()
+        #self.assignRoles()
+        #self.assignTurns()
         self.getQuestion()
         self.state = "in-progress"
 
@@ -22,7 +22,7 @@ class Game:
         player = Player(
             id=id,
             websocket=websocket,
-            name=name
+            userName=name
         )  
         self.players.append(player)
 
@@ -31,7 +31,7 @@ class Game:
             player.role = "crewmate"
 
         temp = self.players
-        imposter = temp[random.randrange(len(temp))]
+        imposter = temp[random.randrange(1, len(temp)+1)]
         imposter.role = "imposter"
         return imposter
 
