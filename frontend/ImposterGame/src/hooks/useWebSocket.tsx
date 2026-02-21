@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+
 type MessageHandler = (msg: any) => void;
 
 export default function useWebSocket(url: string, onMessage?: MessageHandler) {
@@ -10,6 +11,7 @@ export default function useWebSocket(url: string, onMessage?: MessageHandler) {
   useEffect(() => {
     const ws = new WebSocket(url);
     wsRef.current = ws;
+    
 
     ws.onopen = () => setConnected(true);
     ws.onmessage = (ev) => {

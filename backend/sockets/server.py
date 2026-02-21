@@ -113,7 +113,7 @@ async def handler(websocket):
             }
             await websocket.send(json.dumps(startResponse))
             
-        elif msg_type == "player-list":
+        elif msg_type == "request-list":
             roomid = data.get("roomid", None)
 
             if roomid is None:
@@ -130,7 +130,7 @@ async def handler(websocket):
                 "players": [player.userName for player in game.players]
             }
             await websocket.send(json.dumps(playerListResponse))
-        elif msg_type == "source-code":
+        elif msg_type == "request-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
             
@@ -149,8 +149,9 @@ async def handler(websocket):
 async def main():
    
     async with websockets.serve(handler, "localhost", 8765):
-        print(generate_random_id())
+        
         game1 = create_room("123")
+        print(game1.gameId)
         game1.addPlayer("123", "websocket", "Lem")
         game1.addPlayer("123", "websocket", "Abdou")
         print("Running on ws://localhost:8765")

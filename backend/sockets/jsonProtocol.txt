@@ -1,0 +1,57 @@
+Defining what all the json messages sent between frontend and backend mean and what fields they should include
+
+Each json message should start with a 'type' field that defines what the request/message is trying to do. (for example 'type' : 'create-room' would be at the top of a request from frontend to backend to creaate a room)
+
+Frontend -> Backend:
+
+    #request to create a room
+    create-room:
+        playerid
+        name
+
+    #request to join a room by code
+    join-room
+        playerid
+        name
+        roomid
+
+    #request to start the game
+    start-game
+        playerid
+        name
+        roomid
+    
+    #request list of players
+    request-list
+        playerid
+        name
+        roomid
+
+    #request most recent source code of quesiton (only after game has started)
+    request-code
+        playerid
+        name
+        roomid
+
+Backend -> Frontend
+
+    #response to create-room
+    room-created
+        roomid
+    
+    #response to join-room
+    player-joined   
+        roomid
+    
+    #response to start-game
+    game-started
+        roomid
+    
+    #response to request-list
+    player-list
+        players : [name1, name2, ...]
+    
+    #response to request-code
+    source-code
+        question
+        code
