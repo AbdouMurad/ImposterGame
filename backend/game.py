@@ -1,6 +1,10 @@
 import random
 import json
 
+class Commit:
+    def __init__(self, playerid, code):
+        self.playerid = playerid
+        self.code = code
 
 class Game:
     def __init__(self, gameId):
@@ -8,13 +12,23 @@ class Game:
         self.gameId = gameId
         self.players = []
         self.questionId = None
-        self.selectedQuestion = ""
+
+        self.question = ""
+        self.sourceCode = []
+        
         self.currentPlayer: Player = None
+
+    def commit(self, playerid, code) -> Commit:
+        commit = Commit(playerid, code)
+        self.sourceCode.append(commit)
+        return commit
 
     def startGame(self):
         self.state = "initializing"
-        #self.assignRoles()
-        #self.assignTurns()
+
+       # self.assignRoles()
+       # self.assignTurns()
+
         self.getQuestion()
         self.state = "in-progress"
 
@@ -66,7 +80,15 @@ class Game:
             } 
             for q in data["questions"]
         }
-        return questions.get(random.randrange(1, len(questions)+1))        
+        self.questionId = random.randrange(1, len(questions)+1)
+
+        question =  questions.get(self.questionId)        
+        self.commit("SYSTEM", question["starter_code"])
+        self.question = question["description"]
+
+        return question
+    def getSourceCode(self):
+        return self.sourceCode[len(self.sourceCode)-1].code
     
     def selectQuestion(self,Id):
         filePath = 'backend/test_questions/questions.json'
@@ -83,7 +105,10 @@ class Game:
             } 
             for q in data["questions"]
         }
-        return questions.get(Id)
+        question = questions.get(Id)
+        self.commit("SYSTEM", question["starter_code"])
+        self.question = question["description"]
+        return question
 
 
 class Node:

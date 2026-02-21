@@ -3,6 +3,8 @@
 <body>
     <input id="msg" placeholder="Type something" />
     <button onclick="send()">Send</button>
+    <button onclick="getSourceCode()">Source Code</button>
+    <button onclick="startGame()">Start Game</button>
 
     <script>
         const socket = new WebSocket("ws://localhost:8765");
@@ -13,7 +15,26 @@
         socket.onmessage = (event) => {
             console.log("Server:", event.data);
         };
-        
+        function getSourceCode() {
+            const value = document.getElementById("msg").value;
+
+            socket.send(JSON.stringify({
+                type: "source-code",
+                name: "Abdou",
+                playerid: value,
+                roomid: value
+            }));
+        }
+        function startGame() {
+            const value = document.getElementById("msg").value;
+
+            socket.send(JSON.stringify({
+                type: "start-game",
+                name: "Abdou",
+                playerid: value,
+                roomid: value
+            }));
+        }
         function send() {
             const value = document.getElementById("msg").value;
     

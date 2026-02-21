@@ -28,18 +28,17 @@ def check_room(room_id):
 
 async def handler(websocket):
     print("Client connected")
-
     async for message in websocket:
         try:
             data = json.loads(message)
         except json.JSONDecodeError:
             await websocket.send("Invalid JSON")
             continue
-
+        
         msg_type = data.get("type", None)
         if msg_type == "create-room":
             roomid = generate_random_id()
-            playerid = data.get("platyerid",None)
+            playerid = data.get("playerid", None)
             name = data.get("name", None)
 
             game = create_room(roomid)
@@ -125,6 +124,18 @@ async def handler(websocket):
                 "players": [player.userName for player in game.players]
             }
             await websocket.send(json.dumps(playerListResponse))
+        elif msg_type == "source-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+            
+            game = rooms[roomid]
+            source_code = game.getSourceCode()
+            await websocket.send(json.dumps({
+                "type": "source-code",
+                "question": game.question,
+                "code": source_code
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
