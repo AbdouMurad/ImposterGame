@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useWebSocket from "../hooks/useWebSocket";
 
@@ -7,7 +7,7 @@ type JoinFormProps = {
 };
 
 export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
-  const wsUrl = "ws://localhost:8765"; 
+  const wsUrl = "ws://localhost:8765";
   const { send, connected, lastMessage, error } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
 
   const [username, setUsername] = useState("");
@@ -16,6 +16,10 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
   const [joinError, setJoinError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+
+  // fallback timer refs to avoid getting stuck if server ack is missed
+  const fallbackRef = useRef<number | null>(null);
+  const navigatedRef = useRef(false);
 
   // react to server replies (robust: handles string messages and logs them)
   useEffect(() => {
@@ -38,13 +42,21 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
     const rid = msg?.roomid ?? msg?.roomId ?? null;
 
     if (rid || type === "player-joined" || type === "room-created" || type === "player-list") {
+      // clear fallback timer and navigate once
       setLoading(false);
       setJoinError(null);
-      const targetRid = rid ?? joinCode;
-      if (targetRid) {
-        navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(targetRid)}`);
-      } else {
-        navigate(`/GameRoom/lobby`);
+      if (fallbackRef.current) {
+        window.clearTimeout(fallbackRef.current);
+        fallbackRef.current = null;
+      }
+      if (!navigatedRef.current) {
+        navigatedRef.current = true;
+        const targetRid = rid ?? joinCode;
+        if (targetRid) {
+          navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(targetRid)}`);
+        } else {
+          navigate(`/GameRoom/lobby`);
+        }
       }
       return;
     }
@@ -52,6 +64,10 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
     if (type === "error" || type === "join-error") {
       setLoading(false);
       setJoinError(String(msg.message ?? msg.error ?? "Failed to join"));
+      if (fallbackRef.current) {
+        window.clearTimeout(fallbackRef.current);
+        fallbackRef.current = null;
+      }
     }
   }, [lastMessage, joinCode, navigate]);
 
@@ -59,6 +75,16 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
   useEffect(() => {
     if (error) setJoinError(error);
   }, [error]);
+
+  // cleanup fallback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (fallbackRef.current) {
+        window.clearTimeout(fallbackRef.current);
+        fallbackRef.current = null;
+      }
+    };
+  }, []);
 
   function onJoinClick() {
     if (!connected) {
@@ -77,6 +103,22 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
 
     // send join request to server
     send({ type: "join-room", playerid, name: username || playerid, roomid: joinCode });
+
+    // fallback: if we don't see a server ack within 2s, navigate anyway to the lobby.
+    // Lobby will perform a one-shot request-list on connect to refresh the player list.
+    if (fallbackRef.current) {
+      window.clearTimeout(fallbackRef.current);
+      fallbackRef.current = null;
+    }
+    navigatedRef.current = false;
+    fallbackRef.current = window.setTimeout(() => {
+      fallbackRef.current = null;
+      if (!navigatedRef.current) {
+        navigatedRef.current = true;
+        setLoading(false);
+        navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(joinCode)}`);
+      }
+    }, 2000) as unknown as number;
     // wait for server reply in lastMessage effect
   }
 
