@@ -1,24 +1,29 @@
 import random
 
-class Node:
-    def __init__(self):
-        self.next = None
-        self.back = None  #
+
 class Game:
     def __init__(self, gameId):
+        self.state = "waiting"
         self.gameId = gameId
         self.players = []
         self.questionId = None
+        self.selectedQuestion = ""
         self.currentPlayer: Player = None
 
-    def addPlayer(self, player):  
-        self.players.append(player)
+    def startGame(self):
+        self.state = "initializing"
+        self.assignRoles()
+        self.assignTurns()
+        self.getQuestion()
+        self.state = "in-progress"
 
-        # Link the new player into the linked list
-        if len(self.players) > 1:
-            prev = self.players[-2]
-            prev.next = player
-            player.back = prev
+    def addPlayer(self, id, websocket, name):
+        player = Player(
+            id=id,
+            websocket=websocket,
+            name=name
+        )  
+        self.players.append(player)
 
     def assignRoles(self):
         for player in self.players:
@@ -31,7 +36,15 @@ class Game:
 
     def assignTurns(self):
         random.shuffle(self.players)  
-        return self.players
+        root = self.players[0]
+        current = root
+        
+        for i in range(1, len(self.players)):
+            current.next = self.players[i]
+            current = current.next
+        current.next = root
+
+        self.currentPlayer = root
 
     def nextPlayer(self):
         if self.currentPlayer:
@@ -44,9 +57,17 @@ class Game:
         pass
 
 
+class Node:
+    def __init__(self):
+        self.next = None
+        self.back = None
+
 class Player(Node):
-    def __init__(self, userName):
+    def __init__(self, id, websocket, userName):
         super().__init__()
+        self.id = id
+        self.active = False
+        self.websocket = websocket
         self.userName = userName
         self.role = "crewmate"
 
@@ -55,7 +76,6 @@ class Player(Node):
 
     def is_imposter(self):
         return self.role == "imposter"
-
 
 
 if __name__ == "__main__":
