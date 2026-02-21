@@ -5,15 +5,28 @@ type JoinFormProps = {
 }
 
 export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
+    const [username, setUsername] = useState("");
     const [joinCode, setJoinCode] = useState("");
     return (
         <>
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-                <form className="bg-gray-900 rounded-lg border border-purple-950 w-100 h-50">
+                <form className="bg-gray-900 rounded-lg border border-purple-950 w-100 h-75">
                     <h1 className="text-purple-700 text-l font-bold m-5">
                         Join Room
                     </h1>
                     <div className="flex flex-col m-5">
+                        <label className="text-gray-200 text-sm mb-2">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="Enter username"
+                            value={username}
+                            onChange={(e) => setJoinCode(e.target.value)}
+                            className="border rounded bg-gray-900 text-white px-3 py-1"
+                        />
+                    </div><div className="flex flex-col m-5">
                         <label className="text-gray-200 text-sm mb-2">
                             Join Code
                         </label>
