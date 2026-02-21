@@ -28,18 +28,17 @@ def check_room(room_id):
 
 async def handler(websocket):
     print("Client connected")
-
     async for message in websocket:
         try:
             data = json.loads(message)
         except json.JSONDecodeError:
             await websocket.send("Invalid JSON")
             continue
-
+        
         msg_type = data.get("type", None)
         if msg_type == "create-room":
             roomid = generate_random_id()
-            playerid = data.get("platyerid",None)
+            playerid = data.get("playerid", None)
             name = data.get("name", None)
 
             game = create_room(roomid)
@@ -48,8 +47,6 @@ async def handler(websocket):
                 websocket=websocket,
                 name=name
             )
-
-
         elif msg_type == "join-room":
             name = data.get("name", None)
             playerid = data.get("playerid", None)
@@ -91,7 +88,18 @@ async def handler(websocket):
             game = rooms[roomid]
             game.startGame()
             print(f"Game in room {roomid} started")
+        elif msg_type == "source-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
             
+            game = rooms[roomid]
+            source_code = game.getSourceCode()
+            await websocket.send(json.dumps({
+                "type": "source-code",
+                "question": game.question,
+                "code": source_code
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
@@ -100,6 +108,8 @@ async def main():
    
     async with websockets.serve(handler, "localhost", 8765):
         print(generate_random_id())
+        create_room("ABC123")
+        
         print("Running on ws://localhost:8765")
         await asyncio.Future()  # run forever
 
