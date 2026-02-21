@@ -27,6 +27,11 @@ Frontend -> Backend:
         name
         roomid
 
+    #request the time
+    request-time
+        roomid
+        playerid
+        
     #request list of players in order of turns
     request-order
         playerid 
@@ -79,3 +84,10 @@ Backend -> Frontend
         questionExamples
         questtionStarterCode
         code
+
+    #response to request-time
+    time-left
+        roomid
+        playerdid
+        currentPlayer
+        timeLeft
