@@ -25,6 +25,9 @@ class Game:
         self.state = "waiting"
         self.gameId = gameId
         self.players = []
+
+        self.turns = []
+
         self.questionId = None
         self.questionTitle = ""
         self.questionDifficulty = ""
@@ -48,7 +51,7 @@ class Game:
         self.getQuestion()
         self.state = "in-progress"
 
-    def addPlayer(self, id, websocket, name):
+    async def addPlayer(self, id, websocket, name):
         player = Player(
             id=id,
             websocket=websocket,
@@ -56,8 +59,10 @@ class Game:
         )  
         self.players.append(player)
 
+
         for player in self.players:
-            player.websocket.send(json.dumps(self.getListOfPlayers()))
+            print("SENDING TO ", player.userName)
+            await player.websocket.send(json.dumps(self.getListOfPlayers()))
 
     def assignRoles(self):
         for player in self.players:
@@ -68,14 +73,18 @@ class Game:
         imposter.role = "imposter"
         return imposter
 
+
     def assignTurns(self):
         random.shuffle(self.players)  
         root = self.players[0]
         current = root
+
+        self.turns = [root]
         
         for i in range(1, len(self.players)):
             current.next = self.players[i]
             current = current.next
+            self.turns.append(current)
         current.next = root
 
         self.currentPlayer = root
@@ -160,6 +169,12 @@ class Game:
         return {
             "type": "player-list",
             "players": [player.userName for player in self.players]
+        }
+    
+    def getListOfTurns(self):
+        return {
+            "type": "turn-list",
+            "players": [player.userName for player in self.turns]
         }
 
 class Node:
