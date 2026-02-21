@@ -21,7 +21,7 @@
             "title": "Two Sum",
             "difficulty": "Easy",
             "description": "Given the root of a binary tree, return the length of the diameter of the tree.\n\nThe diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.\n\nThe length of a path between two nodes is represented by the number of edges between them.\n\nExample 1:\nInput: root = [1,2,3,4,5]\nOutput: 3\nExplanation: 3 is the length of the path [4,2,1,3] or [5,2,1,3].\n\nExample 2:\nInput: root = [1,2]\nOutput: 1\n\nConstraints:\n- The number of nodes in the tree is in the range [1, 10^4].\n- -100 <= Node.val <= 100",
-            "starter_code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    # Write your solution here\n    for pos, nums in list:\n        pass",
+            "starter_code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    # Write your solution here\n    for pos, nums in list:\n        pass"
         
         },
 
@@ -60,28 +60,6 @@
             "description": "The encoding rule is: k[encoded_string], where the encoded_string inside the square brackets is being repeated exactly k times. Note that k is guaranteed to be a positive integer.\n\nYou may assume that the input string is always valid; there are no extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, k. For example, there will not be input like 3a or 2[4].\n\nThe test cases are generated so that the length of the output will never exceed 10^5.\n\nExample 1:\nInput: s = \"3[a]2[bc]\"\nOutput: \"aaabcbc\"\nExample 2:\nInput: s = \"3[a2[c]]\"\nOutput: \"accaccacc\"\nExample 3:\nInput: s = \"2[abc]3[cd]ef\"\nOutput: \"abcabccdcdcdef\"\n\nConstraints:\n- 1 <= s.length <= 30\n- s consists of lowercase English letters, digits, and square brackets '[]'.\n- s is guaranteed to be a valid input.\n- All the integers in s are in the range [1, 300].",
             "starter_code": "def decodeString(self, s: str) -> str:"
         
-        },
-
-        {
-            "id": 8,
-            "title": 
-            
-
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
         }
     ]
 }
