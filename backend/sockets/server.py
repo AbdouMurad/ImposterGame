@@ -43,7 +43,7 @@ async def handler(websocket):
             name = data.get("name", None)
 
             game = create_room(roomid)
-            game.addPlayer(
+            await game.addPlayer(
                 id=playerid,
                 websocket=websocket,
                 name=name
@@ -80,7 +80,7 @@ async def handler(websocket):
                 await websocket.send("Game already in progress")
                 continue
 
-            game.addPlayer(
+            await game.addPlayer(
                 id=playerid,
                 websocket=websocket,
                 name=name
@@ -144,6 +144,41 @@ async def handler(websocket):
                 "questtionStarterCode": game.questionStarterCode,
                 "code": source_code
             }))
+        elif msg_type == "request-list":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            await websocket.send(json.dumps(game.getListOfTurns()))
+        elif msg_type == "run-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            if game.state == "in-progress":
+                source_code = data.get("source-code", None)
+
+                
+
+
+
+        elif msg_type == "request-time":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            timeLeft = game.timer.getTimeLeft()
+            currentPlayer = game.currentPlayer
+            
+            await websocket.send(json.dumps({
+                "type": "time-left",
+                "roomid": roomid,
+                "playerid": playerid,
+                "currentPlayer": currentPlayer,
+                "timeLeft": timeLeft
+
+            }))
+
 
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
