@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState, useRef } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
 import useWebSocket from "../../hooks/useWebSocket";
 
 export default function Lobby() {
@@ -7,18 +7,22 @@ export default function Lobby() {
   const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
 
   const location = useLocation();
+  const navigate = useNavigate();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
-
-  const pollingRef = useRef<number | null>(null);
+  const [myName, setMyName] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const startedNavigatedRef = useRef(false);
 
   // if a roomid was provided in the URL (e.g. after creating a room), pick it up
   useEffect(() => {
     try {
       const params = new URLSearchParams(location.search);
       const rid = params.get("roomid");
+      const pname = params.get("player") ?? params.get("name") ?? null;
       if (rid) setRoomId(rid);
+      if (pname) setMyName(pname);
     } catch {
       // ignore
     }
@@ -54,34 +58,22 @@ export default function Lobby() {
         const pname = lastMessage.name ?? lastMessage.playerName ?? null;
         if (pname) setPlayers((p) => (p.includes(pname) ? p : [...p, pname]));
       } else if (t === "game-started") {
-        setGameStarted(true);
+        // navigate to the Game page when the server confirms the game started
+        const rid = lastMessage.roomid ?? lastMessage.roomId ?? roomId;
+        if (!startedNavigatedRef.current) {
+          startedNavigatedRef.current = true;
+          setStarting(false);
+          const playerParam = myName ? `&player=${encodeURIComponent(myName)}` : "";
+          const target = `/Game?roomid=${encodeURIComponent(rid || "")}${playerParam}`;
+          navigate(target);
+        }
       }
     }
-  }, [lastMessage]);
-
-  // // start polling player list once we have a room ID
-  // useEffect(() => {
-  //   if (!roomId) return;
-
-  //   // request player-list immediately and then poll every 2s
-  //   const ask = () => {
-  //     if (connected && roomId) send({ type: "request-list", roomid: roomId });
-  //   };
-
-  //   ask();
-  //   pollingRef.current = window.setInterval(ask, 2000);
-
-  //   return () => {
-  //     if (pollingRef.current) {
-  //       window.clearInterval(pollingRef.current);
-  //       pollingRef.current = null;
-  //     }
-  //   };
-  // }, [roomId, connected, send]);
-
+  }, [lastMessage, navigate, roomId, myName]);
 
   function onStartGame() {
     if (!roomId) return;
+    setStarting(true);
     send({ type: "start-game", roomid: roomId });
   }
 
@@ -126,8 +118,12 @@ export default function Lobby() {
           )}
 
           <div style={{ marginTop: 24 }}>
-            <button onClick={onStartGame} disabled={!roomId || gameStarted} style={{ cursor: 'pointer', padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}>
-              {gameStarted ? "Game started" : "Start Game"}
+            <button
+              onClick={onStartGame}
+              disabled={!roomId || gameStarted || starting}
+              style={{ cursor: 'pointer', padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}
+            >
+              {gameStarted ? "Game started" : starting ? "Starting..." : "Start Game"}
             </button>
           </div>
         </div>
@@ -147,7 +143,17 @@ export default function Lobby() {
               ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {players.map((p) => (
-                    <li key={p} style={{ padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{p}</li>
+                    <li
+                      key={p}
+                      style={{
+                        padding: "8px 0",
+                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                        color: p === myName ? "#a78bfa" : "#fff",
+                        fontWeight: p === myName ? 700 : 400,
+                      }}
+                    >
+                      {p}
+                    </li>
                   ))}
                 </ul>
               )}

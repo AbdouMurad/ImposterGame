@@ -10,7 +10,7 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
   const wsUrl = "ws://localhost:8765";
   const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [gameStarted, setGameStarted] = useState(false);
+  // removed: const [gameStarted, setGameStarted] = useState(false);
 
   const [name, setName] = useState("Player" + Math.floor(Math.random() * 1000));
   const pollingRef = useRef<number | null>(null);
@@ -37,12 +37,14 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
           // If we issued the create request from this component, navigate now
           if (waitingForCreate) {
             setWaitingForCreate(false);
-            navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(rid)}`);
+            // include player's name so Lobby can highlight it
+            navigate(
+              `/GameRoom/lobby?roomid=${encodeURIComponent(rid)}&player=${encodeURIComponent(name)}`
+            );
           }
         }
-      } else if (t === "game-started") {
-        setGameStarted(true);
       }
+      // removed handling for "game-started" since this component doesn't need to track it
     }
   }, [lastMessage, waitingForCreate, navigate]);
 
