@@ -44,6 +44,11 @@ Frontend -> Backend:
         name
         roomid
 
+    #request the tests cases for the given question
+    request-tests
+        playerid
+        roomid
+
     run-test
         playerid
         name
@@ -88,6 +93,12 @@ Backend -> Frontend
     #response to request-time
     time-left
         roomid
-        playerdid
+        playerid
         currentPlayer
         timeLeft
+
+    #response to request-tests
+    test-cases
+        roomid
+        playerid
+        tests

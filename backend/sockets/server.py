@@ -150,6 +150,7 @@ async def handler(websocket):
 
             game = rooms[roomid]
             await websocket.send(json.dumps(game.getListOfTurns()))
+            
         elif msg_type == "run-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
@@ -157,10 +158,6 @@ async def handler(websocket):
             game = rooms[roomid]
             if game.state == "in-progress":
                 source_code = data.get("source-code", None)
-
-                
-
-
 
         elif msg_type == "request-time":
             roomid = data.get("roomid", None)
@@ -176,7 +173,20 @@ async def handler(websocket):
                 "playerid": playerid,
                 "currentPlayer": currentPlayer,
                 "timeLeft": timeLeft
+            }))
 
+        elif msg_type == "request-tests":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            tests = game.getTests()
+
+            await websocket.send(json.dumps({
+                "type": "test-cases",
+                "roomid": roomid,
+                "playerid": playerid,
+                "tests": tests
             }))
 
 
