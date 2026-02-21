@@ -193,6 +193,22 @@ async def handler(websocket):
                 "playerid": playerid,
                 "tests": tests
             }))
+
+        elif msg_type == "request-logs":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            commitLogs = game.getCommitLogs()
+
+
+            await websocket.send(json.dumps({
+                "type": "commitlogs-logs",
+                "playerid": playerid,
+                "roomid": roomid,
+                "commitLogs": commitLogs
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
@@ -204,6 +220,7 @@ async def main():
         game1 = create_room("123")
         print(game1.gameId)
         print("Running on ws://localhost:8765")
+        
         await asyncio.Future()  # run forever
 
 asyncio.run(main())
