@@ -29,8 +29,8 @@ export default function Problem() {
                     Constraints:
                     <div className="bg-gray-900 p-3 m-2 rounded-xl">
                         {"1 <= temperatures.length <= 1000."}
-                        <br />
-                        <br />
+                    </div>
+                    <div className="bg-gray-900 p-3 m-2 rounded-xl">
                         {"1 <= temperatures[i] <= 100"}
                     </div>
                 </p>

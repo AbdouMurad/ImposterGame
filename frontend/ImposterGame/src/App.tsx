@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import Welcome from "./pages/Welcome/Welcome.tsx";
-import Info from "./components/Info/Info.tsx";
-import JoinForm from "./components/JoinForm/JoinForm.tsx";
-import Game from "./pages/Game/Game.tsx"
+import Welcome from "./pages/Welcome.tsx";
+import Info from "./components/Info.tsx";
+import JoinForm from "./components/JoinForm.tsx";
+import Game from "./pages/Game.tsx"
 
 function App() {
-  const [isJoinOpen, setIsJoinOpen] = useState(false);
+  const [isJoinOpen, setIsJoinOpen] = useState(true);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   return (
