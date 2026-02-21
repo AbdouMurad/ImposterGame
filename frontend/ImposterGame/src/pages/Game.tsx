@@ -8,11 +8,12 @@ import { useState } from "react";
 
 export default function Game() {
     type Phase = "coding" | "voting"
-    const [phase, setPhase] = useState<Phase>("coding");
+    const [phase, setPhase] = useState<Phase>("voting");
     // TODO: Add users here
     const [usernames, setUsernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
     // TODO: Add call to socket for highlighted user here
     const [highlightedUser, setHighlightedUser] = useState<string>("Abdou");
+    const [highlightedCommit, setHighlightedCommit] = useState<number>(0);
     const [code, setCode] = useState("// Start coding...");
 
     const handleEditorChange = (value: string | undefined) => {
@@ -25,6 +26,10 @@ export default function Game() {
 
     const handleCardClick = (username: string) => {
         setHighlightedUser(username)
+    };
+
+    const handleCommitClick = (index: number) => {
+        setHighlightedCommit(index)
     };
 
     return (
@@ -60,7 +65,7 @@ export default function Game() {
                             </button>
                         </div>
                     </div>)}
-                    {phase === "voting" && (<VersionPanel />)}
+                    {phase === "voting" && (<VersionPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} />)}
                 </div>
             </div >
         </>

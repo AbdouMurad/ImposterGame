@@ -5,12 +5,23 @@ import { useState } from "react";
 import CommitCard from "./CommitCard";
 
 type Commit = {
+    index: number
     username: string;
     code: string
 }
 
-export default function Game() {
-    const [commits, setCommits] = useState<Commit[]>([{ username: "James", code: "// Hello World" }, { username: "Abdou", code: "// Hello World" }, { username: "Kevin", code: "// Hello World" }]);
+type VersionPanelProps = {
+    HighlightedCommit: number;
+    HandleCommitClick: (index: number) => void;
+}
+
+export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
+    const [commits, setCommits] = useState<Commit[]>([{ index: 0, username: "James", code: "// Hello World" },
+    { index: 1, username: "Abdou", code: "// Hello World" },
+    { index: 2, username: "Kevin", code: "// Hello World" },
+    { index: 3, username: "Paolo", code: "// Hello World" },
+    { index: 4, username: "Lem", code: "// Hello World" }]);
+
     return (
         <>
             <div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
@@ -23,21 +34,11 @@ export default function Game() {
                             Commits
                         </h1>
                         <div className="flex flex-col items-center ">
-                            {commits.map((commit, index) => {
-                                const isFirst = index === 0;
-                                const isLast = index === commits.length - 1;
-
-                                return (
-                                    <div key={commit.username}>
-                                        <CommitCard
-                                            Username={commit.username}
-                                            Code={commit.code}
-                                            IsFirst={isFirst}
-                                            IsLast={isLast}
-                                        />
-                                    </div>
-                                );
-                            })}
+                            {commits.map((commit) => (
+                                <div key={commit.index}>
+                                    <CommitCard Index={commit.index} Username={commit.username} IsFirst={commit.index === 0} IsLast={commit.index === commits.length - 1} Highlight={commit.index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
+                                </div>
+                            ))}
                         </div>
 
                     </div>
