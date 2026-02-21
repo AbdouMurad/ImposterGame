@@ -19,7 +19,7 @@
             const value = document.getElementById("msg").value;
 
             socket.send(JSON.stringify({
-                type: "source-code",
+                type: "request-code",
                 name: "Abdou",
                 playerid: value,
                 roomid: value

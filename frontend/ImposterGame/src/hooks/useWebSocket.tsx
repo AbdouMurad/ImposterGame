@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+
 type MessageHandler = (msg: any) => void;
 
 type UseWebSocketOptions = {
