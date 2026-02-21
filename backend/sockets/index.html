@@ -7,6 +7,7 @@
     <button onclick="createRoom()">Create Room</button>
     <button onclick="getSourceCode()">Source Code</button>
     <button onclick="startGame()">Start Game</button>
+    <button onclick="sendtests()">Tests</button>
 
     <script>
         const socket = new WebSocket("ws://localhost:8765");
@@ -55,6 +56,17 @@
             socket.send(JSON.stringify({
                 type: "join-room",
                 name: name,
+                playerid: value,
+                roomid: value
+            }));
+        }
+
+        function sendtests() {
+            const value = document.getElementById("roomid").value;
+            const name = document.getElementById("name").value;
+    
+            socket.send(JSON.stringify({
+                type: "request-tests",
                 playerid: value,
                 roomid: value
             }));
