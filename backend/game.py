@@ -12,8 +12,11 @@ class Game:
         self.gameId = gameId
         self.players = []
         self.questionId = None
-
-        self.question = ""
+        self.questionTitle = ""
+        self.questionDifficulty = ""
+        self.questionDesc = ""
+        self.questionExample = ""
+        self.questionStarterCode = ""
         self.sourceCode = []
         
         self.currentPlayer: Player = None
@@ -76,6 +79,7 @@ class Game:
                 "title": q["title"],
                 "difficulty": q["difficulty"],
                 "description": q["description"],
+                "examples": q["examples"],
                 "starter_code": q["starter_code"]
             } 
             for q in data["questions"]
@@ -84,7 +88,11 @@ class Game:
 
         question =  questions.get(self.questionId)        
         self.commit("SYSTEM", question["starter_code"])
-        self.question = question["description"]
+        self.questionDifficulty = question["difficulty"]
+        self.questionTitle = question["title"]
+        self.questionDesc = question["description"]
+        self.questionExample = question["examples"]
+        self.questionStarterCode = question["starter_code"]      
 
         return question
     def getSourceCode(self):
@@ -101,13 +109,18 @@ class Game:
                 "title": q["title"],
                 "difficulty": q["difficulty"],
                 "description": q["description"],
+                "examples": q["examples"],
                 "starter_code": q["starter_code"]
             } 
             for q in data["questions"]
         }
         question = questions.get(Id)
         self.commit("SYSTEM", question["starter_code"])
-        self.question = question["description"]
+        self.questionDifficulty = question["difficulty"]
+        self.questionTitle = question["title"]
+        self.questionDesc = question["description"]
+        self.questionExample = question["examples"]
+        self.questionStarterCode = question["starter_code"]
         return question
 
 
@@ -138,7 +151,12 @@ if __name__ == "__main__":
     # Test getQuestion - randomly chosen
     print("=== Get Question (Random) ===")
     question = game.getQuestion()
-    print(question['title'])
- 
+    print(question["title"])
+    print(question["difficulty"])
+    print(question["description"])
+    print(question["examples"])
+    print(question["starter_code"])
 
-   
+
+
+

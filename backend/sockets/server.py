@@ -138,7 +138,12 @@ async def handler(websocket):
             source_code = game.getSourceCode()
             await websocket.send(json.dumps({
                 "type": "source-code",
-                "question": game.question,
+                "questionId": game.questionId,
+                "questionTitle": game.questionTitle,
+                "questionDifficulty": game.questionDifficulty,
+                "questionDescription": game.questionDesc,
+                "questionExamples": game.questionExample,
+                "questtionStarterCode": game.questionStarterCode,
                 "code": source_code
             }))
 

@@ -53,5 +53,10 @@ Backend -> Frontend
     
     #response to request-code
     source-code
-        question
+        questionId
+        questionTitle
+        questionDifficulty
+        questionDescription
+        questionExamples
+        questtionStarterCode
         code
