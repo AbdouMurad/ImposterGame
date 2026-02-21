@@ -1,4 +1,5 @@
 import random
+import json
 
 class Node:
     def __init__(self):
@@ -37,11 +38,39 @@ class Game:
         if self.currentPlayer:
             self.currentPlayer = self.currentPlayer.next
 
-    def getQuestion(Id):  
-        pass
+    def getQuestion(self):  
+        filePath = 'backend/test_questions/questions.json'
 
-    def selectQuestion(self):
-        pass
+        with open(filePath) as f:
+            data = json.load(f)
+        
+        questions = {
+            q["id"]: {
+                "title": q["title"],
+                "difficulty": q["difficulty"],
+                "description": q["description"],
+                "starter_code": q["starter_code"]
+            } 
+            for q in data["questions"]
+        }
+        return questions.get(random.randrange(1, len(questions)+1))        
+    
+    def selectQuestion(self,Id):
+        filePath = 'backend/test_questions/questions.json'
+
+        with open(filePath) as f:
+            data = json.load(f)
+        
+        questions = {
+            q["id"]: {
+                "title": q["title"],
+                "difficulty": q["difficulty"],
+                "description": q["description"],
+                "starter_code": q["starter_code"]
+            } 
+            for q in data["questions"]
+        }
+        return questions.get(Id)
 
 
 class Player(Node):
@@ -59,42 +88,12 @@ class Player(Node):
 
 
 if __name__ == "__main__":
-    # Setup
     game = Game("game1")
-    p1 = Player("Alice")
-    p2 = Player("Bob")
-    p3 = Player("Charlie")
 
-    for p in [p1, p2, p3]:
-        game.addPlayer(p)
+    # Test getQuestion - randomly chosen
+    print("=== Get Question (Random) ===")
+    question = game.getQuestion()
+    print(question['title'])
+ 
 
-    # Show players list
-    print("=== Players List ===")
-    for p in game.players:
-        print(f"  {p.userName}")
-
-    # Test linked list
-    print("\n=== Linked List ===")
-    print(f"p1.next: {p1.next.userName}")   # Bob
-    print(f"p2.back: {p2.back.userName}")   # Alice
-    print(f"p3.back: {p3.back.userName}")   # Bob
-
-    # Test roles
-    print("\n=== Roles ===")
-    imposter = game.assignRoles()
-    print(f"Imposter: {imposter.userName}")
-    for p in game.players:
-        print(f"  {p.userName}: {p.role}")
-
-    # Test turns
-    print("\n=== Turn Order ===")
-    game.assignTurns()
-    for p in game.players:
-        print(f"  {p.userName}")
-
-    # Test nextPlayer
-    print("\n=== Next Player ===")
-    game.currentPlayer = p1
-    print(f"Current: {game.currentPlayer.userName}")
-    game.nextPlayer()
-    print(f"After next: {game.currentPlayer.userName}")
+   
