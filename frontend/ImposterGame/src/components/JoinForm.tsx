@@ -20,29 +20,24 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
   // fallback timer refs to avoid getting stuck if server ack is missed
   const fallbackRef = useRef<number | null>(null);
   const navigatedRef = useRef(false);
+  // persist the player id chosen on join so effects can reference it
+  const playerIdRef = useRef<string | null>(null);
 
   // react to server replies (robust: handles string messages and logs them)
   useEffect(() => {
     if (!lastMessage) return;
 
-    // raw log for diagnostics
     console.log("[JoinForm] lastMessage:", lastMessage);
 
-    // try to parse string payloads
     let msg: any = lastMessage;
     if (typeof msg === "string") {
-      try {
-        msg = JSON.parse(msg);
-      } catch {
-        // leave as string
-      }
+      try { msg = JSON.parse(msg); } catch { /* keep as string */ }
     }
 
     const type = msg?.type;
     const rid = msg?.roomid ?? msg?.roomId ?? null;
 
     if (rid || type === "player-joined" || type === "room-created" || type === "player-list") {
-      // clear fallback timer and navigate once
       setLoading(false);
       setJoinError(null);
       if (fallbackRef.current) {
@@ -51,11 +46,12 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
       }
       if (!navigatedRef.current) {
         navigatedRef.current = true;
+        const pname = playerIdRef.current ?? username ?? "player";
         const targetRid = rid ?? joinCode;
         if (targetRid) {
-          navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(targetRid)}`);
+          navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(targetRid)}&player=${encodeURIComponent(pname)}`);
         } else {
-          navigate(`/GameRoom/lobby`);
+          navigate(`/GameRoom/lobby?player=${encodeURIComponent(pname)}`);
         }
       }
       return;
@@ -69,7 +65,7 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
         fallbackRef.current = null;
       }
     }
-  }, [lastMessage, joinCode, navigate]);
+  }, [lastMessage, joinCode, navigate, username]);
 
   // effect: surface WebSocket-level errors
   useEffect(() => {
@@ -98,14 +94,13 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
     setJoinError(null);
     setLoading(true);
 
-    // choose a stable player id — here we use the username if provided, else a random id
     const playerid = username.trim() ? username.trim() : "p-" + Math.random().toString(36).slice(2, 9);
+    playerIdRef.current = playerid;
 
     // send join request to server
     send({ type: "join-room", playerid, name: username || playerid, roomid: joinCode });
 
     // fallback: if we don't see a server ack within 2s, navigate anyway to the lobby.
-    // Lobby will perform a one-shot request-list on connect to refresh the player list.
     if (fallbackRef.current) {
       window.clearTimeout(fallbackRef.current);
       fallbackRef.current = null;
@@ -116,10 +111,10 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
       if (!navigatedRef.current) {
         navigatedRef.current = true;
         setLoading(false);
-        navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(joinCode)}`);
+        const pname = playerIdRef.current ?? username ?? "player";
+        navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(joinCode)}&player=${encodeURIComponent(pname)}`);
       }
     }, 2000) as unknown as number;
-    // wait for server reply in lastMessage effect
   }
 
   return (

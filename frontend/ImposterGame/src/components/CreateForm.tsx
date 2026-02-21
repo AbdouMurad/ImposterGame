@@ -1,4 +1,3 @@
-// ...existing code...
 import { useEffect, useRef, useState } from "react";
 import useWebSocket from "../hooks/useWebSocket";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +37,10 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
           // If we issued the create request from this component, navigate now
           if (waitingForCreate) {
             setWaitingForCreate(false);
-            navigate(`/GameRoom/lobby?roomid=${encodeURIComponent(rid)}`);
+            // include player's name so Lobby can highlight it
+            navigate(
+              `/GameRoom/lobby?roomid=${encodeURIComponent(rid)}&player=${encodeURIComponent(name)}`
+            );
           }
         }
       }
@@ -107,4 +109,5 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
         </form>
       </div>
     </>
-  )}
+  );
+}

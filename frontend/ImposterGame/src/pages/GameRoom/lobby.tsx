@@ -10,13 +10,16 @@ export default function Lobby() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
+  const [myName, setMyName] = useState<string | null>(null);
 
   // if a roomid was provided in the URL (e.g. after creating a room), pick it up
   useEffect(() => {
     try {
       const params = new URLSearchParams(location.search);
       const rid = params.get("roomid");
+      const pname = params.get("player") ?? params.get("name") ?? null;
       if (rid) setRoomId(rid);
+      if (pname) setMyName(pname);
     } catch {
       // ignore
     }
@@ -145,7 +148,17 @@ export default function Lobby() {
               ) : (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {players.map((p) => (
-                    <li key={p} style={{ padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{p}</li>
+                    <li
+                      key={p}
+                      style={{
+                        padding: "8px 0",
+                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                        color: p === myName ? "#a78bfa" : "#fff",
+                        fontWeight: p === myName ? 700 : 400,
+                      }}
+                    >
+                      {p}
+                    </li>
                   ))}
                 </ul>
               )}
