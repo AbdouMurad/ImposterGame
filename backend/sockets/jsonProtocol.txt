@@ -55,6 +55,11 @@ Frontend -> Backend:
         roomid
         source-code
 
+    request-logs
+        playerid
+        name
+        roomid
+
 Backend -> Frontend
 
     #response to create-room
@@ -102,3 +107,11 @@ Backend -> Frontend
         roomid
         playerid
         tests
+
+    #response to request-logs
+    commit-logs
+        roomid
+        playerid
+        commits : [
+            [ playername , code] , [...], [...]
+        ]

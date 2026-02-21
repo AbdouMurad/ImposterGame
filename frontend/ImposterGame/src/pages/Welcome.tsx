@@ -1,15 +1,17 @@
 import { Github } from "lucide-react";
 import { CircleQuestionMark } from "lucide-react";
-import { Link } from 'react-router-dom';
 
 import { useState } from "react";
 
 import Info from "../components/Info.tsx";
 import JoinForm from "../components/JoinForm.tsx";
+import CreateForm from "../components/CreateForm.tsx"
 
 export default function Welcome() {
     const [isJoinOpen, setIsJoinOpen] = useState(false);
     const [isInfoOpen, setIsInfoOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+
     return (
         <>
             <div className="h-screen bg-gray-950">
@@ -33,25 +35,27 @@ export default function Welcome() {
                         <strong className="text-white">Code</strong>
                     </h1>
                 </header>
+
                 <div className="flex justify-center">
                     <button
                         type="button"
                         onClick={() => setIsJoinOpen(true)}
-                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300">
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
                         Join Room
                     </button>
-                    <Link to="/GameRoom/lobby">
-                        <button
-                            type="button"
-                            className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300">
-                            Create Room
-                        </button>
-                    </Link>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsCreateOpen(true)}
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
+                        Create Room
+                    </button>
 
                 </div>
             </div>
             {isJoinOpen && <JoinForm onCancelJoinClick={() => setIsJoinOpen(false)} />}
             {isInfoOpen && <Info onInfoExitClick={() => setIsInfoOpen(false)} />}
+            {isCreateOpen && <CreateForm onCancelCreateClick={() => setIsCreateOpen(false)} />}
         </>
     );
 }
