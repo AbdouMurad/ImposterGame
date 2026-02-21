@@ -39,7 +39,8 @@ async def handler(websocket):
         msg_type = data.get("type", None)
         if msg_type == "create-room":
             roomid = generate_random_id()
-            playerid = data.get("platyerid",None)
+            # client should send `playerid` and optional `name`
+            playerid = data.get("playerid", None)
             name = data.get("name", None)
 
             game = create_room(roomid)
@@ -48,6 +49,11 @@ async def handler(websocket):
                 websocket=websocket,
                 name=name
             )
+            # send back the created room id as JSON so frontend can display/use it
+            try:
+                await websocket.send(json.dumps({"type": "room-created", "roomid": roomid}))
+            except Exception as e:
+                print("Failed to send room-created message:", e)
 
 
         elif msg_type == "join-room":

@@ -1,5 +1,6 @@
 import { Github } from "lucide-react";
 import { CircleQuestionMark } from "lucide-react";
+import { Link } from 'react-router-dom';
 
 type WelcomeProps = {
     onInfoClick: () => void
@@ -37,11 +38,14 @@ export default function Welcome({ onInfoClick, onJoinClick }: WelcomeProps) {
                         className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
                         Join Room
                     </button>
-                    <button
-                        type="button"
-                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
-                        Create Room
-                    </button>
+                    <Link to="/GameRoom/lobby">
+                        <button
+                            type="button"
+                            className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
+                            Create Room
+                        </button>
+                    </Link>
+
                 </div>
             </div>
         </>
