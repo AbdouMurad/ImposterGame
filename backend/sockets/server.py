@@ -47,6 +47,13 @@ async def handler(websocket):
                 websocket=websocket,
                 name=name
             )
+
+            createResponse = {
+                "type": "room-created",
+                "roomid": roomid
+            }
+            await websocket.send(json.dumps(createResponse))
+
         elif msg_type == "join-room":
             name = data.get("name", None)
             playerid = data.get("playerid", None)
@@ -72,10 +79,15 @@ async def handler(websocket):
                 websocket=websocket,
                 name=name
             )
-            print(f"{name} joined room {roomid}")
-            print(rooms)
 
-            await websocket.send(f"Welcome {name} to room {roomid}")
+            joinResponse = {
+                "type": "player-joined",
+                "roomid": roomid
+            }
+
+            await websocket.send(json.dumps(joinResponse))
+            print(joinResponse)
+
         elif msg_type == "start-game":
             roomid = data.get("roomid", None)
 
@@ -88,6 +100,30 @@ async def handler(websocket):
             game = rooms[roomid]
             game.startGame()
             print(f"Game in room {roomid} started")
+
+            startResponse = {
+                "type": "game-started",
+                "roomid": roomid
+            }
+            await websocket.send(json.dumps(startResponse))
+            
+        elif msg_type == "player-list":
+            roomid = data.get("roomid", None)
+
+            if roomid is None:
+                await websocket.send("No room ID provided")
+                continue
+            if not check_room(roomid):
+                await websocket.send("Room not found")
+                continue
+
+            game = rooms[roomid]
+
+            playerListResponse = {
+                "type": "player-list",
+                "players": [player.userName for player in game.players]
+            }
+            await websocket.send(json.dumps(playerListResponse))
         elif msg_type == "source-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
@@ -108,8 +144,9 @@ async def main():
    
     async with websockets.serve(handler, "localhost", 8765):
         print(generate_random_id())
-        create_room("ABC123")
-        
+        game1 = create_room("123")
+        game1.addPlayer("123", "websocket", "Lem")
+        game1.addPlayer("123", "websocket", "Abdou")
         print("Running on ws://localhost:8765")
         await asyncio.Future()  # run forever
 
