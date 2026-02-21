@@ -160,6 +160,9 @@ async def handler(websocket):
             game = rooms[roomid]
             if game.state == "in-progress":
                 source_code = data.get("source-code", None)
+                engine = Engine(source_code, game.getTestCases())
+                results = engine.runTests()
+                print(results)
 
         elif msg_type == "request-time":
             roomid = data.get("roomid", None)
