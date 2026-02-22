@@ -82,12 +82,6 @@ async def handler(websocket):
                 await websocket.send("Game already in progress")
                 continue
 
-            await game.addPlayer(
-                id=playerid,
-                websocket=websocket,
-                name=name
-            )
-
             joinResponse = {
                 "type": "player-joined",
                 "roomid": roomid,
@@ -97,6 +91,13 @@ async def handler(websocket):
 
             await websocket.send(json.dumps(joinResponse))
             print(joinResponse)
+            
+            await game.addPlayer(
+                id=playerid,
+                websocket=websocket,
+                name=name
+            )
+
 
         elif msg_type == "start-game":
             roomid = data.get("roomid", None)
