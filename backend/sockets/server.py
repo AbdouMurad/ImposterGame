@@ -263,7 +263,7 @@ async def handler(websocket):
 
             await websocket.send(json.dumps({
                 "type": "log-list",
-                "logs": game.getCommitLogs()}))
+                "logs": game.getCommitLogs()['Commits']}))
 
 
         elif msg_type == "run-code":

@@ -108,7 +108,7 @@ Backend -> Frontend
 
     #response to request-list or emmited when new player joins room
     log-list
-        logs : [code, playerid]
+        logs : [[code, playerid], ...]
 
 
     player-list
