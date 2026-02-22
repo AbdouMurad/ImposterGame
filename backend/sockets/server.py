@@ -82,12 +82,6 @@ async def handler(websocket):
                 await websocket.send("Game already in progress")
                 continue
 
-            await game.addPlayer(
-                id=playerid,
-                websocket=websocket,
-                name=name
-            )
-
             joinResponse = {
                 "type": "player-joined",
                 "roomid": roomid,
@@ -97,6 +91,13 @@ async def handler(websocket):
 
             await websocket.send(json.dumps(joinResponse))
             print(joinResponse)
+            
+            await game.addPlayer(
+                id=playerid,
+                websocket=websocket,
+                name=name
+            )
+
 
         elif msg_type == "start-game":
             roomid = data.get("roomid", None)
@@ -179,6 +180,7 @@ async def handler(websocket):
             await websocket.send(json.dumps({
                 "type": "source-code",
                 "questionId": game.questionId,
+                "questionCategory": game.questionCategory,
                 "questionTitle": game.questionTitle,
                 "questionDifficulty": game.questionDifficulty,
                 "questionDescription": game.questionDesc,
@@ -262,6 +264,24 @@ async def handler(websocket):
                 "playerid": playerid,
                 "votes": votes
             }))
+
+        elif msg_type == "run-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+            source_code = data.get("source-code", None)
+
+            game = rooms[roomid]
+            if game.state == "in-progress":
+                results = game.runCode(source_code)
+                all_passed = all(t["passed"] for t in results[str(game.questionId)]["tests"])
+                if all_passed:
+                    game.commit(playerid, source_code)
+                await websocket.send(json.dumps({
+                    "type": "test-results",
+                    "roomid": roomid,
+                    "playerid": playerid,
+                    "results": results
+                }))
 
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
