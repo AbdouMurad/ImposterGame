@@ -257,6 +257,15 @@ async def handler(websocket):
             game = rooms[roomid]
             await game.startRound()
 
+        elif msg_type == "request-logs":
+            roomid = data.get("roomid", None)
+            game = rooms[roomid]
+
+            await websocket.send(json.dumps({
+                "type": "log-list",
+                "logs": game.getCommitLogs()}))
+
+
         elif msg_type == "run-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
