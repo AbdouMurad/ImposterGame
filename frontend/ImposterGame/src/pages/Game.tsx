@@ -99,9 +99,12 @@ export default function Game() {
         
         } else if (type === "time-left") {
             setTime(parseInt(msg.timeLeft));
+            setHighlightedUser(msg.currentPlayer);
             
         } else if (type === "next-turn") {
-            send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
+            if (currentUser === highlightedUser) {
+                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
+            }
             setHighlightedUser(msg.name);
             startTurn();
         }

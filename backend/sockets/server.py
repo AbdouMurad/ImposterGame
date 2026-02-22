@@ -140,7 +140,7 @@ async def handler(websocket):
             playerid = data.get("playerid", None)
             roomid = data.get("roomid", None)
 
-            print("Requesting imposter for playerid:", playerid, "in roomid:", roomid)
+           
             game = rooms[roomid]
             imposter = next((p for p in game.players if p.role == "imposter"), None)
 
@@ -149,7 +149,7 @@ async def handler(websocket):
                      "type": "error", 
                      "message": "No imposter found"}))
                 return
-            print("Imposter found:", imposter.userName)
+            
             
             await websocket.send(json.dumps({
                 "type": "imposter-player",
@@ -177,6 +177,9 @@ async def handler(websocket):
             game = rooms[roomid]
 
             source_code = game.getSourceCode()
+            
+            print(game.sourceCode,"\n\n",source_code,'------')
+
             await websocket.send(json.dumps({
                 "type": "source-code",
                 "questionId": game.questionId,
@@ -314,8 +317,7 @@ async def handler(websocket):
 
             game = rooms[roomid]
             game.commit(playerid, source_code)
-            print('new log')
-            print(game.getCommitLogs())
+            
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 

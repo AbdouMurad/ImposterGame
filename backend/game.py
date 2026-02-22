@@ -51,13 +51,14 @@ class Game:
                 await self.emit({
                     "type": "time-left",
                     "roomid": self.gameId,
-                    "timeLeft": self.time_left
+                    "timeLeft": self.time_left,
+                    "currentPlayer": self.currentPlayer.userName if self.currentPlayer else ""
                 })
                 await asyncio.sleep(1)
                 self.time_left -= 1
             await self.nextTurn()
         except asyncio.CancelledError:
-            print("Timer cancelled")
+            pass
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
@@ -77,6 +78,9 @@ class Game:
            
         return commitLogs
 
+    def getSourceCode(self):
+        return self.sourceCode[len(self.sourceCode)-1][1]
+    
     def startGame(self):
         self.state = "initializing"
         self.assignRoles()
@@ -88,7 +92,7 @@ class Game:
     async def startRound(self):
         self.state = "in-progress"
         await self.stopTimer()
-        self.timer_task = asyncio.create_task(self.startTimer(5))
+        self.timer_task = asyncio.create_task(self.startTimer(15))
 
 
 
@@ -157,7 +161,7 @@ class Game:
             "name": self.currentPlayer.id
         })
         # Start timer for the new turn
-        self.timer_task = asyncio.create_task(self.startTimer(5))
+        self.timer_task = asyncio.create_task(self.startTimer(15))
     
     def determineWinner(self):
         imposterWin = False
@@ -246,9 +250,6 @@ class Game:
         self.questionParameters.append(question["parameters"])
         return question
 
-    def getSourceCode(self):
-        return self.sourceCode[len(self.sourceCode)-1][1]
-    
     def runCode(self):
         result = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName).runTests()
         
