@@ -42,6 +42,7 @@ class Game:
 
         self.questionId = None
         self.questionTitle = ""
+        self.questionCategory = ""
         self.questionDifficulty = ""
         self.questionDesc = ""
         self.questionExample = ""
@@ -106,6 +107,12 @@ class Game:
         imposter.role = "imposter"
         return imposter
 
+    def getOrder(self):
+        order = []
+        for player in self.turns:
+            order.append(player.userName)
+        return order
+
 
     def assignTurns(self):
         random.shuffle(self.players)  
@@ -164,6 +171,7 @@ class Game:
         questions = {
             q["id"]: {
                 "title": q["title"],
+               # "category": q["category"],
                 "difficulty": q["difficulty"],
                 "description": q["description"],
                 "examples": q["examples"],
@@ -179,6 +187,7 @@ class Game:
         self.commit("SYSTEM", question["starter_code"])
         self.questionDifficulty = question["difficulty"]
         self.questionTitle = question["title"]
+        #self.questionCategory = question["category"]
         self.questionDesc = question["description"]
         self.questionExample = question["examples"]
         self.questionStarterCode = question["starter_code"]    
