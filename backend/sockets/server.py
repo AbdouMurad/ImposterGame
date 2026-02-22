@@ -220,11 +220,11 @@ async def handler(websocket):
 
 
             print("Time left:", timeLeft)
-            await websocket.send(json.dumps({
+            await game.emit({
                 "type": "time-left",
                 "roomid": roomid,
                 "timeLeft": timeLeft
-            }))
+            })
 
         elif msg_type == "request-tests":
             roomid = data.get("roomid", None)
