@@ -1,36 +1,14 @@
 import random
 import json
 import time
-from sockets.runner import Engine
+import asyncio
+
+from backend.sockets.runner import Engine
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
         self.code = code
 
-class Timer:
-    def __init__(self, duration):
-        self.duration = duration
-        self.running = False
-
-    def startTime(self):
-        if not self.running:
-            self.start_time = time.time()
-            self.running = True
-
-    def getTime(self):
-        return time.time() - self.start_time
-        
-    
-    def getTimeLeft(self):
-        timeleft = round(self.duration - self.getTime())
-        if timeleft < 0 and self.running:
-
-            timeleft = 0
-            self.running = False
-
-        return timeleft
-        
-    
 
 class Game:
     def __init__(self, gameId):
@@ -40,7 +18,8 @@ class Game:
 
         self.turns = []
 
-        self.timer = None
+        self.timer_task = None
+        self.time_left = 0
 
         self.questionId = None
         self.questionTitle = ""
@@ -54,7 +33,31 @@ class Game:
         self.sourceCode = []
         
         self.currentPlayer: Player = None
- 
+
+    async def startTimer(self, duration):
+        # cancel old timer if running
+        if self.timer_task:
+            self.timer_task.cancel()
+
+        self.time_left = duration
+
+        try:
+            while self.time_left > 0 and self.state == "in-progress":
+                await self.emit({
+                    "type": "time-left",
+                    "roomid": self.gameId,
+                    "timeLeft": self.time_left
+                })
+
+                await asyncio.sleep(1)
+                self.time_left -= 1
+
+            if self.state == "in-progress":
+                await self.nextTurn()
+
+        except asyncio.CancelledError:
+            # timer safely cancelled
+            pass
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
@@ -82,8 +85,9 @@ class Game:
         self.getQuestion()
         
 
-    def startRound(self):
+    async def startRound(self):
         self.state = "in-progress"
+        self.timer_task = asyncio.create_task(self.startTimer(60))
 
 
 
@@ -98,8 +102,13 @@ class Game:
         await self.emit(self.getListOfPlayers())
 
     async def emit(self, message):
-        for player in self.players:
-            await player.websocket.send(json.dumps(message))
+        if not self.players:
+            return
+
+        await asyncio.gather(*[
+            player.websocket.send(json.dumps(message))
+            for player in self.players
+        ])
 
     def assignRoles(self):
         for player in self.players:
@@ -137,17 +146,19 @@ class Game:
 
         self.currentPlayer = root
 
-    def nextTurn(self):
+    async def nextTurn(self):
         self.currentPlayer.active = False
         self.currentPlayer = self.currentPlayer.next
         self.currentPlayer.active = True
 
-        self.emit({
+        await self.emit({
             "type": "next-turn",
             "roomid": self.gameId,
             "playerid": self.currentPlayer.id,
             "name": self.currentPlayer.userName
         })
+
+        self.timer_task = asyncio.create_task(self.startTimer(60))
 
         return self.currentPlayer
     
@@ -239,7 +250,6 @@ class Game:
         return question
 
     def getSourceCode(self):
-        print(self.sourceCode)
         return self.sourceCode[len(self.sourceCode)-1][1]
     
     def runCode(self):

@@ -47,32 +47,32 @@ export default function Game() {
         setRoomId(id);
         setCurrentUser(playerName);
         send({ type: "request-order", playerid: playerName, name: playerName, roomid: id });
-        send({ type: "request-imposter", playerid: currentUser, roomid: id });
-    }, []);
+        
+    }, [connected]);
 
     useEffect(() => {
-        send({ type: "start-round", roomid: id });
+        if (currentUser == highlightedUser) {
+            console.log("starting round")
+            send({ type: "start-round", roomid: id});
+        }
         startTurn();
     }, [imposterId]);
 
     const startTurn = () => {
         send({ type: "request-code", playerid: currentUser, name: currentUser, roomid: id });
-        send({ type: "request-time", roomid: id });
+        
     }
 
-    const timeLoop = () => {
-        console.log("[Game] Time left:", time);
-        if (time > 0 && currentUser == highlightedUser) {
-            send({ type: "request-time", roomid: id });
-        } else {
-            setRoundActive(false);
-        }
-    }
+    // const timeLoop = () => {
+    //     if (time > 0 && currentUser == highlightedUser) {
+    //         send({ type: "request-time", roomid: id });
+    //     } else {
+    //         setRoundActive(false);
+    //     }
+    // }
 
     useEffect(() => {
         if (!lastMessage) return;
-
-        console.log("[JoinForm] lastMessage:", lastMessage);
 
         let msg: any = lastMessage;
         if (typeof msg === "string") {
@@ -80,11 +80,16 @@ export default function Game() {
         }
 
         const type = msg?.type;
-
+        
+        console.log("Received message:", lastMessage);
         if (type === "turn-list") {
+            console.log("TURN LIST")
             setUsernames(msg.players);
             setHighlightedUser(msg.players[0]);
+            send({ type: "request-imposter", playerid: playerName, roomid: id });
+            
         } else if (type === "imposter-player") {
+            console.log("here2", msg.name)
             setImposterId(msg.name);
         } else if (type === "source-code") {
             setCode(msg.code);
@@ -92,9 +97,8 @@ export default function Game() {
             setDescription(msg.questionDescription);
             setExamples(msg.questionExamples);
         } else if (type === "time-left") {
-            console.log("[Game] Received time-left:", msg.timeLeft);
             setTime(parseInt(msg.timeLeft));
-            timeLoop();
+            // timeLoop();
         } else if (type === "next-turn") {
             setHighlightedUser(msg.name);
             startTurn();
