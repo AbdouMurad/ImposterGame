@@ -118,6 +118,7 @@ async def handler(websocket):
                 "roomid": roomid
             }
             await game.emit(startResponse)
+            
         elif msg_type == "request-order":
             print("here")
             print(data)
@@ -293,6 +294,41 @@ async def handler(websocket):
                     "playerid": playerid,
                     "results": results
                 }))
+
+            elif msg_type == "add-vote":
+                roomid = data.get("roomid", None)
+                playerid = data.get("playerid", None)       # the player casting the vote
+                targetid = data.get("targetid", None)      # the player being voted against
+
+                game = rooms[roomid]
+                if game.state == "voting":
+                    game.addVote(targetid)
+                    votes = game.getVotes()
+
+                    await game.emit({
+                        "type": "vote-added",
+                        "roomid": roomid,
+                        "votedFor": targetid,
+                        "votes": votes
+                    })
+
+            elif msg_type == "determine-winner":
+                roomid = data.get("roomid", None)
+                playerid = data.get("playerid", None)
+
+                game = rooms[roomid]
+                if game.state == "voting":
+                    imposter_wins = game.determineWinner()
+                    crewmate_wins = not imposter_wins
+                    votes = game.getVotes()
+
+                    await game.emit({
+                        "type": "game-over",
+                        "roomid": roomid,
+                        "imposterWins": imposter_wins,
+                        "crewmatesWin": crewmate_wins,
+                        "votes": votes
+                    })
 
         else:
             await websocket.send(f"Unknown message type: {msg_type}")

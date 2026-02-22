@@ -73,6 +73,15 @@ Frontend -> Backend:
         roomid
         playerid
         source-code
+    
+    add-vote
+        roomid
+        playerid
+        targetid
+
+    determine-winner
+        roomid
+        playerid
 
 Backend -> Frontend
 
@@ -150,3 +159,15 @@ Backend -> Frontend
         playerid
         results
     
+    #response to add-vote
+    vote-added
+        roomid
+        targetid
+        votes
+
+    #respons to determine-winner
+    game-over
+        roomid
+        imposterWins
+        crewmateWins
+        votes
