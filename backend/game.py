@@ -1,19 +1,7 @@
 import random
 import json
 import time
-from backend.sockets.runner import Engine
-'''
-TODO:
--run code
-    - run the most recent commit against the test cases
-    - return the results of the test cases to the client
-- next turn
-    - switch the current player to the next player in the turn order
-    - return the new current player to the client
-    - this should be triggered by a timer that runs for a certain duration (e.g. 60 seconds)
-
-'''
-
+from sockets.runner import Engine
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
@@ -199,7 +187,7 @@ class Game:
         questions = {
             q["id"]: {
                 "title": q["title"],
-               # "category": q["category"],
+                "category": q["category"],
                 "difficulty": q["difficulty"],
                 "description": q["description"],
                 "examples": q["examples"],
@@ -228,10 +216,22 @@ class Game:
         print(self.sourceCode)
         return self.sourceCode[len(self.sourceCode)-1][1]
     
-    def runcode(self):
-        engine = Engine(self.getSourceCode(), self.getTests())
-        results = engine.runTests()
-        return results
+    def runCode(self):
+        result = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName).runTests()
+        
+        if not result.stdout:
+            return {str(self.questionId): {"tests": [{"error": result.stderr, "passed": False}]}}
+        
+        test_results = json.loads(result.stdout)
+        
+        return {
+            str(self.questionId): {
+                "tests": [
+                    {"input": t["input"], "passed": t["passed"]}
+                    for t in test_results
+                ]
+            }
+        }
     
     def getTests(self):
         filePath = 'backend/test_questions/testcases.json'
@@ -255,7 +255,9 @@ class Game:
                 "difficulty": q["difficulty"],
                 "description": q["description"],
                 "examples": q["examples"],
-                "starter_code": q["starter_code"]
+                "starter_code": q["starter_code"],
+                "function_name": q["function_name"],   
+                "parameters": q["parameters"],          
             } 
             for q in data["questions"]
         }
@@ -267,6 +269,8 @@ class Game:
         self.questionDesc = question["description"]
         self.questionExample = question["examples"]
         self.questionStarterCode = question["starter_code"]
+        self.questionFuncName = question["function_name"]      
+        self.questionParameters.append(question["parameters"])  
         return question
 
     def getListOfPlayers(self):
@@ -306,33 +310,34 @@ class Player(Node):
 if __name__ == "__main__":
     game = Game("game1")
 
-    # Manually add players without websockets for testing
     p1 = Player(id="p1", websocket=None, userName="Alice")
     p2 = Player(id="p2", websocket=None, userName="Bob")
     p3 = Player(id="p3", websocket=None, userName="Charlie")
     game.players = [p1, p2, p3]
 
-    # Load a question (sets questionId and starter code)
-    question = game.getQuestion()
+    question = game.selectQuestion(3)
     print(f"\nQuestion loaded: {game.questionTitle} ({game.questionDifficulty})")
-    print(f"Starter code:\n{game.questionStarterCode}")
 
-    # Simulate a player committing a solution
     solution_code = """
-def two_sum(nums, target):
-    seen = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in seen:
-            return [seen[complement], i]
-        seen[num] = i
-"""
+def minRemoveToMakeValid(s):
+    stack = []
+    s = list(s)
+    for i, char in enumerate(s):
+        if char == '(':
+            stack.append(i)
+        elif char == ')':
+            if stack:
+                stack.pop()
+            else:
+                s[i] = ''
+    for i in stack:
+        s[i] = ''
+    return ''.join(s)
+    """
+
     game.commit("p1", solution_code)
     print("\nCommit logs after player submission:")
-    print(game.getCommitLogs())
-
-    # Run the committed code against the test cases
     print("\nRunning code against test cases...")
-    results = game.runcode()
+    results = game.runCode()
     print("Test results:")
     print(results)

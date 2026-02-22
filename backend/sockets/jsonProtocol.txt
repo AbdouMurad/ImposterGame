@@ -69,6 +69,11 @@ Frontend -> Backend:
         playerid
         roomid
 
+    run-code
+        roomid
+        playerid
+        source-code
+
 Backend -> Frontend
 
     #response to create-room
@@ -139,3 +144,9 @@ Backend -> Frontend
         roomid
         playerid
         name
+    #response to run-code
+    test-results
+        roomid
+        playerid
+        results
+    
