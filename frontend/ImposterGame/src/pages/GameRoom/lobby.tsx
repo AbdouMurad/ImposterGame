@@ -28,10 +28,10 @@ export default function Lobby() {
   }, [location.search]);
 
   // one-shot sync: request the current player list when we have a roomId and the socket is connected
-  useEffect(() => {
-    if (!roomId || !connected) return;
-    send({ type: "request-list", roomid: roomId });
-  }, [roomId, connected, send]);
+  // useEffect(() => {
+  //   if (!roomId || !connected) return;
+  //   send({ type: "request-list", roomid: roomId });
+  // }, [roomId, connected, send]);
 
   // handle incoming messages from the server
   useEffect(() => {

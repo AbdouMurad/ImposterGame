@@ -27,7 +27,7 @@ export default function ProblemPanel() {
                 <h1 className="text-gray-200 font-bold m-7 text-2xl">
                     {title}
                 </h1>
-                <p className="text-gray-400 m-7">
+                <div className="text-gray-400 m-7">
                     {description}
                     <br />
                     <br />
@@ -45,7 +45,7 @@ export default function ProblemPanel() {
                             {constraint}
                         </div>
                     ))}
-                </p>
+                </div>
             </div>
         </>
     );
