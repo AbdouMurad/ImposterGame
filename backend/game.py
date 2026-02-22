@@ -1,6 +1,18 @@
 import random
 import json
 import time
+from backend.sockets.runner import Engine
+'''
+TODO:
+-run code
+    - run the most recent commit against the test cases
+    - return the results of the test cases to the client
+- next turn
+    - switch the current player to the next player in the turn order
+    - return the new current player to the client
+    - this should be triggered by a timer that runs for a certain duration (e.g. 60 seconds)
+
+'''
 
 class Commit:
     def __init__(self, playerid, code):
@@ -60,8 +72,8 @@ class Game:
 
     def startGame(self):
         self.state = "initializing"
-
         self.assignRoles()
+        self.setVotes()
         self.assignTurns()
         self.getQuestion()
         self.state = "in-progress"
@@ -110,6 +122,29 @@ class Game:
 
         self.currentPlayer = root
 
+    def nextTurn(self):
+        self.currentPlayer.active = False
+        self.currentPlayer = self.currentPlayer.next
+        self.currentPlayer.active = True
+        return self.currentPlayer
+
+
+    def addVote(self, playerid):
+        for player in self.players:
+            if player.id == playerid:
+                player.votes += 1
+                break
+
+    def setVotes(self):
+        for player in self.players:
+            player.votes = 0
+
+    def getVotes(self):
+        votes = {
+            player.userName: player.votes for player in self.players
+        }
+        return votes
+
     def switchTurns(self):
         self.currentPlayer.active = False
         self.currentPlayer = self.currentPlayer.next
@@ -154,6 +189,11 @@ class Game:
     def getSourceCode(self):
         print(self.sourceCode)
         return self.sourceCode[len(self.sourceCode)-1][1]
+    
+    def runcode(self):
+        engine = Engine(self.getSourceCode(), self.getTests())
+        results = engine.runTests()
+        return results
     
     def getTests(self):
         filePath = 'backend/test_questions/testcases.json'
@@ -211,6 +251,7 @@ class Node:
 class Player(Node):
     def __init__(self, id, websocket, userName):
         super().__init__()
+        self.votes = 0
         self.id = id
         self.active = False
         self.websocket = websocket
@@ -226,6 +267,34 @@ class Player(Node):
 
 if __name__ == "__main__":
     game = Game("game1")
-    game.getQuestion()
-    print("Function Name:", game.questionFuncName)
-    print("Parameters", game.questionParameters)
+
+    # Manually add players without websockets for testing
+    p1 = Player(id="p1", websocket=None, userName="Alice")
+    p2 = Player(id="p2", websocket=None, userName="Bob")
+    p3 = Player(id="p3", websocket=None, userName="Charlie")
+    game.players = [p1, p2, p3]
+
+    # Load a question (sets questionId and starter code)
+    question = game.getQuestion()
+    print(f"\nQuestion loaded: {game.questionTitle} ({game.questionDifficulty})")
+    print(f"Starter code:\n{game.questionStarterCode}")
+
+    # Simulate a player committing a solution
+    solution_code = """
+def two_sum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+"""
+    game.commit("p1", solution_code)
+    print("\nCommit logs after player submission:")
+    print(game.getCommitLogs())
+
+    # Run the committed code against the test cases
+    print("\nRunning code against test cases...")
+    results = game.runcode()
+    print("Test results:")
+    print(results)

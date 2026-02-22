@@ -229,6 +229,20 @@ async def handler(websocket):
                 "commitLogs": commitLogs
             }))
 
+        elif msg_type == "request-vote":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            votes = game.getVotes()
+
+            await websocket.send(json.dumps({
+                "type": "vote-info",
+                "roomid": roomid,
+                "playerid": playerid,
+                "votes": votes
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
