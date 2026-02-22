@@ -48,19 +48,21 @@ export default function Game() {
         setCurrentUser(playerName);
         send({ type: "request-order", playerid: playerName, name: playerName, roomid: id });
         
-    }, [connected]);
-
+    }, []);
+    
     useEffect(() => {
+        
         if (currentUser == highlightedUser) {
             console.log("starting round")
             send({ type: "start-round", roomid: id});
+            //SET PHASE
         }
         startTurn();
+        
     }, [imposterId]);
 
     const startTurn = () => {
         send({ type: "request-code", playerid: currentUser, name: currentUser, roomid: id });
-        
     }
 
     // const timeLoop = () => {
@@ -83,24 +85,24 @@ export default function Game() {
         
         console.log("Received message:", lastMessage);
         if (type === "turn-list") {
-            console.log("TURN LIST")
             setUsernames(msg.players);
             setHighlightedUser(msg.players[0]);
             send({ type: "request-imposter", playerid: playerName, roomid: id });
-            
+
         } else if (type === "imposter-player") {
-            console.log("here2", msg.name)
             setImposterId(msg.name);
         } else if (type === "source-code") {
             setCode(msg.code);
             setTitle(msg.questionTitle);
             setDescription(msg.questionDescription);
             setExamples(msg.questionExamples);
+        
         } else if (type === "time-left") {
             setTime(parseInt(msg.timeLeft));
-            // timeLoop();
+            
         } else if (type === "next-turn") {
             setHighlightedUser(msg.name);
+            send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
             startTurn();
         }
     }, [lastMessage, navigate]);
@@ -111,6 +113,7 @@ export default function Game() {
 
     const runCode = () => {
         // Add logic to execute the code here
+        console.log("Running code:", code);
     };
 
     const handleCardClick = (username: string) => {
@@ -153,6 +156,8 @@ export default function Game() {
                             defaultLanguage="python"
                             defaultValue="// Start coding..."
                             theme="vs-dark"
+                            value={code}
+                            onChange={handleEditorChange}
                         />
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button

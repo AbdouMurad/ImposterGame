@@ -45,7 +45,6 @@ class Game:
         self.time_left = 0
 
     async def startTimer(self, seconds):
-        print("Starting timer")
         self.time_left = seconds
         try:
             while self.time_left > 0:

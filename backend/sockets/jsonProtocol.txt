@@ -83,6 +83,12 @@ Frontend -> Backend:
         roomid
         playerid
 
+    log-code
+        roomid
+        playerid
+        name
+        code
+
 Backend -> Frontend
 
     #response to create-room

@@ -307,7 +307,15 @@ async def handler(websocket):
                     "crewmatesWin": crewmate_wins,
                     "votes": votes
                 })
+        elif msg_type == "log-code":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+            source_code = data.get("code", None)
 
+            game = rooms[roomid]
+            game.commit(playerid, source_code)
+            print('new log')
+            print(game.getCommitLogs())
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
