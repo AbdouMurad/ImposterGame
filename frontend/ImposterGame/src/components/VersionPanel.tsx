@@ -5,12 +5,23 @@ import { useState } from "react";
 import CommitCard from "./CommitCard";
 
 type Commit = {
+    index: number
     username: string;
     code: string
 }
 
-export default function Game() {
-    const [commits, setCommits] = useState<Commit[]>([{ username: "James", code: "// Hello World" }, { username: "Abdou", code: "// Hello World" }, { username: "Kevin", code: "// Hello World" }]);
+type VersionPanelProps = {
+    HighlightedCommit: number;
+    HandleCommitClick: (index: number) => void;
+}
+
+export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
+    const [commits, setCommits] = useState<Commit[]>([{ index: 0, username: "James", code: "// Hello James" },
+    { index: 1, username: "Abdou", code: "// Hello Abdou" },
+    { index: 2, username: "Kevin", code: "// Hello Kevin" },
+    { index: 3, username: "Paolo", code: "// Hello Paolo" },
+    { index: 4, username: "Lem", code: "// Hello Lem" }]);
+
     return (
         <>
             <div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
@@ -23,34 +34,32 @@ export default function Game() {
                             Commits
                         </h1>
                         <div className="flex flex-col items-center ">
-                            {commits.map((commit, index) => {
-                                const isFirst = index === 0;
-                                const isLast = index === commits.length - 1;
-
-                                return (
-                                    <div key={commit.username}>
-                                        <CommitCard
-                                            Username={commit.username}
-                                            Code={commit.code}
-                                            IsFirst={isFirst}
-                                            IsLast={isLast}
-                                        />
-                                    </div>
-                                );
-                            })}
+                            {commits.map((commit) => (
+                                <div key={commit.index}>
+                                    <CommitCard Index={commit.index} Username={commit.username} IsFirst={commit.index === 0} IsLast={commit.index === commits.length - 1} Highlight={commit.index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
+                                </div>
+                            ))}
                         </div>
 
                     </div>
-                    <Editor
-                        height="600px"
-                        width="60%"
-                        defaultLanguage="python"
-                        defaultValue="// Code snippet"
-                        theme="vs-dark"
-                        options={{
-                            readOnly: true
-                        }}
-                    />
+                    {HighlightedCommit !== -1 ? (
+                        <Editor
+                            height="600px"
+                            width="60%"
+                            defaultLanguage="python"
+                            value={commits?.[HighlightedCommit]?.code}
+                            theme="vs-dark"
+                            options={{
+                                readOnly: true
+                            }}
+                        />)
+                        :
+                        (<div className="flex text-center items-center h-[600px] w-[60%] text-gray-500 text-lg bg-gray-900">
+                            <div className="m-10">
+                                The problem has been solved! Review the code snapshots carefully, select the commit files to inspect changes, then vote for the player you think was the imposter.
+                                Remember — look for suspicious edits, unusual patterns, and don’t be fooled!
+                            </div>
+                        </div>)}
                 </div>
                 <div className="flex justify-end border-t-2 border-gray-700">
                 </div>
