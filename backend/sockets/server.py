@@ -3,7 +3,7 @@ import websockets
 import json
 import random
 import string
-from backend.game import Game
+from backend.game import Game, Timer
 from backend.sockets.runner import Engine
 
 rooms = {} #ket = roomid, value = Game
@@ -173,8 +173,12 @@ async def handler(websocket):
         elif msg_type == "request-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
-            
+
             game = rooms[roomid]
+            
+            game.timer = Timer(60)
+            game.timer.startTime()
+
             source_code = game.getSourceCode()
             await websocket.send(json.dumps({
                 "type": "source-code",
@@ -183,7 +187,7 @@ async def handler(websocket):
                 "questionDifficulty": game.questionDifficulty,
                 "questionDescription": game.questionDesc,
                 "questionExamples": game.questionExample,
-                "questtionStarterCode": game.questionStarterCode,
+                "questionCategory": "Test Category",
                 "code": source_code
             }))
         elif msg_type == "request-list":
@@ -206,17 +210,19 @@ async def handler(websocket):
 
         elif msg_type == "request-time":
             roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
+
 
             game = rooms[roomid]
             timeLeft = game.timer.getTimeLeft()
-            currentPlayer = game.currentPlayer
-            
+
+            if timeLeft == 0:
+                self.game.nextTurn()
+
+
+            print("Time left:", timeLeft)
             await websocket.send(json.dumps({
                 "type": "time-left",
                 "roomid": roomid,
-                "playerid": playerid,
-                "currentPlayer": currentPlayer,
                 "timeLeft": timeLeft
             }))
 
@@ -262,6 +268,11 @@ async def handler(websocket):
                 "playerid": playerid,
                 "votes": votes
             }))
+        
+        elif msg_type == "start-round":
+            roomid = data.get("roomid", None)
+            game = rooms[roomid]
+            game.startRound()
 
         else:
             await websocket.send(f"Unknown message type: {msg_type}")

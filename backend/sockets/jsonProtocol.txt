@@ -4,6 +4,9 @@ Each json message should start with a 'type' field that defines what the request
 
 Frontend -> Backend:
 
+    start-round
+        roomid
+
     #request to create a room
     create-room:
         playerid
@@ -30,8 +33,7 @@ Frontend -> Backend:
     #request the time
     request-time
         roomid
-        playerid
-        
+
     #request list of players in order of turns
     request-order
         playerid 
@@ -99,14 +101,12 @@ Backend -> Frontend
         questionDifficulty
         questionDescription
         questionExamples
-        questtionStarterCode
+        questionCategory
         code
 
     #response to request-time
     time-left
         roomid
-        playerid
-        currentPlayer
         timeLeft
 
     #response to request-tests
@@ -133,4 +133,9 @@ Backend -> Frontend
         roomid
         playerid
         votes
-    
+
+    #returns when next turn starts and name of next player
+    next-turn
+        roomid
+        playerid
+        name
