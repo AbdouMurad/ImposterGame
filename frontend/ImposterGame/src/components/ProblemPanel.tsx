@@ -1,6 +1,11 @@
 import { useState } from "react";
 
-export default function Problem() {
+type Example = {
+    input: string;
+    output: string;
+}
+
+export default function ProblemPanel() {
     //TODO : Add call to socket for problem info here
     const [title] = useState<string>("Daily Temperatures");
     const [description] = useState<string>(`You are given an array of integers temperatures where temperatures[i] represents the
@@ -8,9 +13,9 @@ export default function Problem() {
         of days after the ith day before a warmer temperature appears on a future day. If there
         is no day in the future where a warmer temperature will appear for the ith day, set result[i]
         to 0 instead.`);
-    const [examples] = useState<string[]>([
-        "Input: temperatures = [30,38,30,36,35,40,28]Output: [1,4,1,2,1,0,0]",
-        "Input: temperatures = [22,21,20]Output: [0,0,0]"
+    const [examples, setExamples] = useState<Example[]>([
+        { input: "temperatures = [30,38,30,36,35,40,28]", output: "[1,4,1,2,1,0,0]" },
+        { input: "temperatures = [22,21,20]", output: "[0,0,0]" }
     ]);
     const [constraints] = useState<string[]>([
         "1 <= temperatures.length <= 1000.",
@@ -27,9 +32,10 @@ export default function Problem() {
                     <br />
                     <br />
                     <strong className="text-gray-300">Examples:</strong>
-                    {examples.map((example) => (
-                        <div key={example} className="bg-gray-900 p-3 m-2 rounded-xl">
-                            {example}
+                    {examples.map((example, index) => (
+                        <div key={index} className="bg-gray-900 p-3 m-2 rounded-xl">
+                            <div><strong>Input:</strong> {example.input}</div>
+                            <div className="mt-2"><strong>Output:</strong> {example.output}</div>
                         </div>
                     ))}
                     <br />
