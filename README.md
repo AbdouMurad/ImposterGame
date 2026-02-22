@@ -2,6 +2,9 @@
 
 # CheetCode
 
+## How to Start
+Instructions are included inside the backend/sockets/runhost.txt
+
 ## Inspiration
 
 Many of us have played a pretty recently trending game called Imposter and we have pretty good time playing. We wanted to bring that same energy into the world of coding. CheetCode was born from combining the thrill of Imposter with real technical skill-building — a game where reading code carefully and writing clean, readable solutions actually matters. We built it to make the grind of improving as a developer feel less like work and more like hanging out with friends.
