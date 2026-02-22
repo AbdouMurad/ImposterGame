@@ -310,12 +310,25 @@ async def handler(websocket):
                     "votes": votes
                 })
         elif msg_type == "log-code":
-            roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
-            source_code = data.get("code", None)
+                    roomid = data.get("roomid", None)
+                    playerid = data.get("playerid", None)
+                    source_code = data.get("code", None)
 
-            game = rooms[roomid]
-            game.commit(playerid, source_code)
+                    game = rooms[roomid]
+                    game.commit(playerid, source_code)
+
+                    # Push the new "latest commit" to ALL players to avoid race with request-code
+                    await game.emit({
+                        "type": "source-code",
+                        "questionId": game.questionId,
+                        "questionCategory": game.questionCategory,
+                        "questionTitle": game.questionTitle,
+                        "questionDifficulty": game.questionDifficulty,
+                        "questionDescription": game.questionDesc,
+                        "questionExamples": game.questionExample,
+                        "code": game.getSourceCode(),
+                        "committedBy": playerid
+                    })
             
         else:
             await websocket.send(f"Unknown message type: {msg_type}")

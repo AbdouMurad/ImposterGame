@@ -158,10 +158,12 @@ class Game:
         self.currentPlayer.active = True
         await self.emit({
             "type": "next-turn",
-            "name": self.currentPlayer.id
+            # was: self.currentPlayer.id
+            "name": self.currentPlayer.userName
         })
         # Start timer for the new turn
         self.timer_task = asyncio.create_task(self.startTimer(15))
+
     
     def determineWinner(self):
         imposterWin = False
