@@ -34,30 +34,31 @@ class Game:
         
         self.currentPlayer: Player = None
 
-    async def startTimer(self, duration):
-        # cancel old timer if running
-        if self.timer_task:
+    async def stopTimer(self):
+        if self.timer_task and not self.timer_task.done():
             self.timer_task.cancel()
+            try:
+                await self.timer_task
+            except asyncio.CancelledError:
+                pass
+        self.timer_task = None
+        self.time_left = 0
 
-        self.time_left = duration
-
+    async def startTimer(self, seconds):
+        print("Starting timer")
+        self.time_left = seconds
         try:
-            while self.time_left > 0 and self.state == "in-progress":
+            while self.time_left > 0:
                 await self.emit({
                     "type": "time-left",
                     "roomid": self.gameId,
                     "timeLeft": self.time_left
                 })
-
                 await asyncio.sleep(1)
                 self.time_left -= 1
-
-            if self.state == "in-progress":
-                await self.nextTurn()
-
+            await self.nextTurn()
         except asyncio.CancelledError:
-            # timer safely cancelled
-            pass
+            print("Timer cancelled")
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
@@ -87,7 +88,8 @@ class Game:
 
     async def startRound(self):
         self.state = "in-progress"
-        self.timer_task = asyncio.create_task(self.startTimer(60))
+        await self.stopTimer()
+        self.timer_task = asyncio.create_task(self.startTimer(5))
 
 
 
@@ -147,20 +149,16 @@ class Game:
         self.currentPlayer = root
 
     async def nextTurn(self):
+        await self.stopTimer()
         self.currentPlayer.active = False
         self.currentPlayer = self.currentPlayer.next
         self.currentPlayer.active = True
-
         await self.emit({
             "type": "next-turn",
-            "roomid": self.gameId,
-            "playerid": self.currentPlayer.id,
-            "name": self.currentPlayer.userName
+            "name": self.currentPlayer.id
         })
-
-        self.timer_task = asyncio.create_task(self.startTimer(60))
-
-        return self.currentPlayer
+        # Start timer for the new turn
+        self.timer_task = asyncio.create_task(self.startTimer(5))
     
     def determineWinner(self):
         imposterWin = False

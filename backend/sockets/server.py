@@ -144,11 +144,11 @@ async def handler(websocket):
             game = rooms[roomid]
             imposter = next((p for p in game.players if p.role == "imposter"), None)
 
-            # if imposter is None:
-            #     await websocket.send(json.dumps({
-            #         "type": "error", 
-            #         "message": "No imposter found"}))
-            #     return
+            if imposter is None:
+                await websocket.send(json.dumps({
+                     "type": "error", 
+                     "message": "No imposter found"}))
+                return
             print("Imposter found:", imposter.userName)
             
             await websocket.send(json.dumps({
