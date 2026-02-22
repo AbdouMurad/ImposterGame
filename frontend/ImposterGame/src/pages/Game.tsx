@@ -29,7 +29,7 @@ export default function Game() {
     const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
     const [code, setCode] = useState("// Start coding...");
 
-    const [time, setTime] = useState<number>(0);
+    const [time, setTime] = useState<number>(1);
 
     //TODO : Add call to socket for problem info here
     const [title, setTitle] = useState<string>("");
@@ -62,7 +62,7 @@ export default function Game() {
 
     const timeLoop = () => {
         console.log("[Game] Time left:", time);
-        if (time > 0) {
+        if (time > 0 && currentUser == highlightedUser) {
             send({ type: "request-time", roomid: id });
         } else {
             setRoundActive(false);
@@ -83,6 +83,7 @@ export default function Game() {
 
         if (type === "turn-list") {
             setUsernames(msg.players);
+            setHighlightedUser(msg.players[0]);
         } else if (type === "imposter-player") {
             setImposterId(msg.name);
         } else if (type === "source-code") {
@@ -90,8 +91,8 @@ export default function Game() {
             setTitle(msg.questionTitle);
             setDescription(msg.questionDescription);
             setExamples(msg.questionExamples);
-            console.log(msg.questionExamples);
         } else if (type === "time-left") {
+            console.log("[Game] Received time-left:", msg.timeLeft);
             setTime(parseInt(msg.timeLeft));
             timeLoop();
         } else if (type === "next-turn") {
@@ -129,7 +130,7 @@ export default function Game() {
                     {phase === "coding" ?
                         (<SideBar Users={usernames} HighlightedUser={highlightedUser} Time={time} />) :
                         (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} Time={time} />)}
-                    {/* {phase !== "results" ? (
+                    {phase !== "results" ? (
                         imposterId ? (  // only render once imposterId is set
                             currentUser !== imposterId ? <ProblemPanel Title={title} Description={description} Examples={examples} /> : <ImposterPanel />
                         ) : (
@@ -137,8 +138,8 @@ export default function Game() {
                         )
                     ) : (
                         <ResultsPanel />
-                    )} */}
-                    <ProblemPanel Title={title} Description={description} Examples={examples} />
+                    )}
+                    {/* <ProblemPanel Title={title} Description={description} Examples={examples} /> */}
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
