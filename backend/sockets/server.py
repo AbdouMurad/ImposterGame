@@ -223,20 +223,20 @@ async def handler(websocket):
                 "tests": tests
             }))
 
-        elif msg_type == "request-logs":
-            roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
+        # elif msg_type == "request-logs":
+        #     roomid = data.get("roomid", None)
+        #     playerid = data.get("playerid", None)
 
-            game = rooms[roomid]
-            commitLogs = game.getCommitLogs()
+        #     game = rooms[roomid]
+        #     commitLogs = game.getCommitLogs()
 
 
-            await websocket.send(json.dumps({
-                "type": "commitlogs-logs",
-                "playerid": playerid,
-                "roomid": roomid,
-                "commitLogs": commitLogs
-            }))
+        #     await websocket.send(json.dumps({
+        #         "type": "commit-logs",
+        #         "playerid": playerid,
+        #         "roomid": roomid,
+        #         "commitLogs": commitLogs
+        #     }))
 
         elif msg_type == "request-vote":
             roomid = data.get("roomid", None)
@@ -260,7 +260,7 @@ async def handler(websocket):
         elif msg_type == "request-logs":
             roomid = data.get("roomid", None)
             game = rooms[roomid]
-
+            print("SENDING LOGS")
             await websocket.send(json.dumps({
                 "type": "log-list",
                 "logs": game.getCommitLogs()['Commits']}))
