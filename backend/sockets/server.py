@@ -109,6 +109,7 @@ async def handler(websocket):
                 continue
             game = rooms[roomid]
             game.startGame()
+        
             print(f"Game in room {roomid} started")
 
             startResponse = {
@@ -117,7 +118,25 @@ async def handler(websocket):
             }
             await game.emit(startResponse)
 
-            
+        elif msg_type == "request-imposter":
+            playerid = data.get("playerid", None)
+            roomid = data.get("roomid", None)
+
+            game = rooms[roomid]
+            imposter = next((p for p in game.players if p.role == "imposter"), None)
+
+            if imposter is None:
+                await websocket.send(json.dumps({
+                    "type": "error", 
+                    "message": "No imposter found"}))
+                return
+
+            await websocket.send(json.dumps({
+                "type": "imposter-player",
+                "playerid": imposter.id,
+                "name": imposter.userName
+            }))
+
         elif msg_type == "request-list":
             roomid = data.get("roomid", None)
 
@@ -194,17 +213,34 @@ async def handler(websocket):
                 "playerid": playerid,
                 "tests": tests
             }))
+
+        elif msg_type == "request-logs":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            commitLogs = game.getCommitLogs()
+
+
+            await websocket.send(json.dumps({
+                "type": "commitlogs-logs",
+                "playerid": playerid,
+                "roomid": roomid,
+                "commitLogs": commitLogs
+            }))
+
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 
 
 async def main():
    
-    async with websockets.serve(handler, "localhost", 8765):
+    async with websockets.serve(handler, "0.0.0.0", 8765):
         
         game1 = create_room("123")
         print(game1.gameId)
-        print("Running on ws://localhost:8765")
+        print("Running on ws://0.0.0.0:8765")
+        
         await asyncio.Future()  # run forever
 
 asyncio.run(main())

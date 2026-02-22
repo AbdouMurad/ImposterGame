@@ -1,16 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import useWebSocket from "../../hooks/useWebSocket";
+import { useWS } from "../../contexts/WebSocketContext";
 
 export default function Lobby() {
-  const wsUrl = "ws://localhost:8765"; // your backend server (use wss:// in production)
-  const { send, connected, lastMessage } = useWebSocket(wsUrl, { heartbeatIntervalMs: 15000 });
+  const { send, connected, lastMessage } = useWS();
 
   const location = useLocation();
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [players, setPlayers] = useState<string[]>([]);
-  const [gameStarted, setGameStarted] = useState(false);
+  // gameStarted state not needed in the lobby component (server drives navigation)
   const [myName, setMyName] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const startedNavigatedRef = useRef(false);
@@ -120,10 +119,10 @@ export default function Lobby() {
           <div style={{ marginTop: 24 }}>
             <button
               onClick={onStartGame}
-              disabled={!roomId || gameStarted || starting}
+              disabled={!roomId || starting}
               style={{ cursor: 'pointer', padding: "0.75rem 1rem", borderRadius: 8, background: "#ef4444", color: "#fff", border: "none" }}
             >
-              {gameStarted ? "Game started" : starting ? "Starting..." : "Start Game"}
+              {starting ? "Starting..." : "Start Game"}
             </button>
           </div>
         </div>

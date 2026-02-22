@@ -57,7 +57,10 @@ Frontend -> Backend:
 
     request-logs
         playerid
-        name
+        roomid
+
+    request-imposter
+        playerid
         roomid
 
 Backend -> Frontend
@@ -115,3 +118,8 @@ Backend -> Frontend
         commits : [
             [ playername , code] , [...], [...]
         ]
+
+    #response to request
+    imposter-player
+        playerid
+        name

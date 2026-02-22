@@ -60,7 +60,6 @@ export default function Game() {
                             defaultLanguage="python"
                             defaultValue="// Start coding..."
                             theme="vs-dark"
-                            onChange={handleEditorChange}
                         />
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button
