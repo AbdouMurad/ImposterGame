@@ -1,19 +1,7 @@
 import random
 import json
 import time
-from backend.sockets.runner import Engine
-'''
-TODO:
--run code
-    - run the most recent commit against the test cases
-    - return the results of the test cases to the client
-- next turn
-    - switch the current player to the next player in the turn order
-    - return the new current player to the client
-    - this should be triggered by a timer that runs for a certain duration (e.g. 60 seconds)
-
-'''
-
+from sockets.runner import Engine
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
@@ -200,9 +188,21 @@ class Game:
         return self.sourceCode[len(self.sourceCode)-1][1]
     
     def runCode(self):
-        engine = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName)
-        results = engine.runTests()
-        return results
+        result = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName).runTests()
+        
+        if not result.stdout:
+            return {str(self.questionId): {"tests": [{"error": result.stderr, "passed": False}]}}
+        
+        test_results = json.loads(result.stdout)
+        
+        return {
+            str(self.questionId): {
+                "tests": [
+                    {"input": t["input"], "passed": t["passed"]}
+                    for t in test_results
+                ]
+            }
+        }
     
     def getTests(self):
         filePath = 'backend/test_questions/testcases.json'
@@ -288,7 +288,6 @@ if __name__ == "__main__":
 
     question = game.selectQuestion(3)
     print(f"\nQuestion loaded: {game.questionTitle} ({game.questionDifficulty})")
-    print(f"Starter code:\n{game.questionStarterCode}")
 
     solution_code = """
 def minRemoveToMakeValid(s):
@@ -309,22 +308,7 @@ def minRemoveToMakeValid(s):
 
     game.commit("p1", solution_code)
     print("\nCommit logs after player submission:")
-    print(game.getCommitLogs())
-
     print("\nRunning code against test cases...")
     results = game.runCode()
     print("Test results:")
     print(results)
-
-    # Test nextTurn()
-    print("\nAssigning turns...")
-    game.assignTurns()
-    print(f"Turn order: {[p.userName for p in game.turns]}")
-
-    print(f"\nCurrent player: {game.currentPlayer.userName}")
-    game.nextTurn()
-    print(f"After nextTurn(): {game.currentPlayer.userName}")
-    game.nextTurn()
-    print(f"After nextTurn(): {game.currentPlayer.userName}")
-    game.nextTurn()
-    print(f"After nextTurn() (should wrap back to first): {game.currentPlayer.userName}")
