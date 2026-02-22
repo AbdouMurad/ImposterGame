@@ -36,7 +36,7 @@ export default function Game() {
     useEffect(() => {
         setRoomId(id);
         setCurrentUser(playerName);
-        send({ type: "request-order", playerid: currentUser, name: currentUser, roomid: id });
+        send({ type: "request-order", playerid: playerName, name: playerName, roomid: id });
         send({ type: "request-imposter", playerid: currentUser, roomid: id });
     }, []);
 
@@ -55,7 +55,7 @@ export default function Game() {
         if (type === "turn-list") {
             setUsernames(msg.players);
         } else if (type === "imposter-player") {
-            setImposterId(msg.id);
+            setImposterId(msg.name);
         }
     }, [lastMessage, navigate]);
 
@@ -90,9 +90,15 @@ export default function Game() {
                     {phase === "coding" ?
                         (<SideBar Users={usernames} HighlightedUser={highlightedUser} />) :
                         (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />)}
-                    {phase !== "results" ?
-                        (currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />) :
-                        (<ResultsPanel />)}
+                    {phase !== "results" ? (
+                        imposterId ? (  // only render once imposterId is set
+                            currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />
+                        ) : (
+                            <div className="text-gray-400">Loading...</div> // optional placeholder
+                        )
+                    ) : (
+                        <ResultsPanel />
+                    )}
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
