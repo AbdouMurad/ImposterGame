@@ -106,9 +106,9 @@ export default function Game() {
                 send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
             }
             setHighlightedUser(msg.name);
-            if (currentUser === msg.name) {
-                startTurn();
-            }
+            
+            startTurn();
+            
         }
     }, [lastMessage, navigate]);
 
