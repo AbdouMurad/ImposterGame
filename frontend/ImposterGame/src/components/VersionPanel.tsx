@@ -16,11 +16,11 @@ type VersionPanelProps = {
 }
 
 export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
-    const [commits, setCommits] = useState<Commit[]>([{ index: 0, username: "James", code: "// Hello World" },
-    { index: 1, username: "Abdou", code: "// Hello World" },
-    { index: 2, username: "Kevin", code: "// Hello World" },
-    { index: 3, username: "Paolo", code: "// Hello World" },
-    { index: 4, username: "Lem", code: "// Hello World" }]);
+    const [commits, setCommits] = useState<Commit[]>([{ index: 0, username: "James", code: "// Hello James" },
+    { index: 1, username: "Abdou", code: "// Hello Abdou" },
+    { index: 2, username: "Kevin", code: "// Hello Kevin" },
+    { index: 3, username: "Paolo", code: "// Hello Paolo" },
+    { index: 4, username: "Lem", code: "// Hello Lem" }]);
 
     return (
         <>
@@ -42,16 +42,24 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: V
                         </div>
 
                     </div>
-                    <Editor
-                        height="600px"
-                        width="60%"
-                        defaultLanguage="python"
-                        defaultValue="// Code snippet"
-                        theme="vs-dark"
-                        options={{
-                            readOnly: true
-                        }}
-                    />
+                    {HighlightedCommit !== -1 ? (
+                        <Editor
+                            height="600px"
+                            width="60%"
+                            defaultLanguage="python"
+                            value={commits?.[HighlightedCommit]?.code}
+                            theme="vs-dark"
+                            options={{
+                                readOnly: true
+                            }}
+                        />)
+                        :
+                        (<div className="flex text-center items-center h-[600px] w-[60%] text-gray-500 text-lg bg-gray-900">
+                            <div className="m-10">
+                                The problem has been solved! Review the code snapshots carefully, select the commit files to inspect changes, then vote for the player you think was the imposter.
+                                Remember — look for suspicious edits, unusual patterns, and don’t be fooled!
+                            </div>
+                        </div>)}
                 </div>
                 <div className="flex justify-end border-t-2 border-gray-700">
                 </div>

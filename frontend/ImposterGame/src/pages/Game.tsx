@@ -1,19 +1,25 @@
 import Editor from "@monaco-editor/react";
 import SideBar from "../components/SideBar.tsx";
 import VoteSideBar from "../components/VoteSideBar.tsx";
-import Problem from "../components/ProblemPanel.tsx";
+import ProblemPanel from "../components/ProblemPanel.tsx";
+import ImposterPanel from "../components/ImposterPanel.tsx";
 import VersionPanel from "../components/VersionPanel.tsx";
 
 import { useState } from "react";
 
 export default function Game() {
     type Phase = "coding" | "voting"
+    // TODO: Add call to game phase here
     const [phase, setPhase] = useState<Phase>("voting");
-    // TODO: Add users here
+    // TODO: Add call to users here
     const [usernames, setUsernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
-    // TODO: Add call to socket for highlighted user here
+    // TODO: Integrate with join and create forms
+    const [currentUser, setcurrentUser] = useState<string>("James");
+    // TODO: Add call to imposter here
+    const [imposterId, setImposterId] = useState<string>("James");
+    // TODO: Add call to current user here
     const [highlightedUser, setHighlightedUser] = useState<string>("Abdou");
-    const [highlightedCommit, setHighlightedCommit] = useState<number>(0);
+    const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
     const [code, setCode] = useState("// Start coding...");
 
     const handleEditorChange = (value: string | undefined) => {
@@ -44,7 +50,7 @@ export default function Game() {
                 <div className="flex flex-1">
                     {phase === "coding" && (<SideBar Users={usernames} HighlightedUser={highlightedUser} />)}
                     {phase === "voting" && (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />)}
-                    <Problem />
+                    {currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />}
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>

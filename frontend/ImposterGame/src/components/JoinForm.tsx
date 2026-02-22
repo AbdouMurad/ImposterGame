@@ -120,7 +120,7 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-        <form className="bg-gray-900 rounded-lg border border-purple-950 w-100 h-75">
+        <form className="bg-gray-900 rounded-lg border border-gray-700 w-100 h-75">
           <h1 className="text-purple-700 text-l font-bold m-5">Join Room</h1>
 
           <div className="flex flex-col m-5">
