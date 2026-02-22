@@ -260,7 +260,7 @@ async def handler(websocket):
         elif msg_type == "run-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
-            source_code = data.get("source-code", None)
+            source_code = data.get("sourcecode", None)
 
             game = rooms[roomid]
             if game.state == "in-progress":

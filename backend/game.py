@@ -253,8 +253,8 @@ class Game:
         self.questionParameters.append(question["parameters"])
         return question
 
-    def runCode(self):
-        result = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName).runTests()
+    def runCode(self, source_code):
+        result = Engine(source_code, self.getTests(), self.questionFuncName).runTests()
         
         if not result.stdout:
             return {str(self.questionId): {"tests": [{"error": result.stderr, "passed": False}]}}

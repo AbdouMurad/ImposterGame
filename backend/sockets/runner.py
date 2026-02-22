@@ -3,6 +3,7 @@ import tempfile
 import os
 import subprocess
 import sys
+import textwrap  # <-- add
 
 class Engine:
     def __init__(self, sourceCode, tests, funcName):
@@ -15,65 +16,70 @@ class Engine:
             solution_path = os.path.join(tmpdir, "solution.py")
 
             with open(solution_path, "w") as f:
-                f.write(self.sourceCode)
+                # Normalize newlines to reduce weird parsing edge-cases
+                f.write((self.sourceCode or "").replace("\r\n", "\n").replace("\r", "\n"))
 
-            runner_code = f"""
-import json
-import solution
+            safe_func_name = (self.funcName or "").strip()
+            tests_json = json.dumps(self.tests, ensure_ascii=False)
 
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+            runner_code = textwrap.dedent(f"""
+                import json
+                import solution
 
-def build_tree(nodes):
-    if not nodes:
-        return None
-    root = TreeNode(nodes[0])
-    queue = [root]
-    i = 1
-    while queue and i < len(nodes):
-        node = queue.pop(0)
-        if i < len(nodes) and nodes[i] is not None:
-            node.left = TreeNode(nodes[i])
-            queue.append(node.left)
-        i += 1
-        if i < len(nodes) and nodes[i] is not None:
-            node.right = TreeNode(nodes[i])
-            queue.append(node.right)
-        i += 1
-    return root
+                class TreeNode:
+                    def __init__(self, val=0, left=None, right=None):
+                        self.val = val
+                        self.left = left
+                        self.right = right
 
-TREE_FUNCS = {{"isValidBST", "diameterOfBinaryTree", "isBalanced"}}
-FUNC_NAME = "{self.funcName}"
+                def build_tree(nodes):
+                    if not nodes:
+                        return None
+                    root = TreeNode(nodes[0])
+                    queue = [root]
+                    i = 1
+                    while queue and i < len(nodes):
+                        node = queue.pop(0)
+                        if i < len(nodes) and nodes[i] is not None:
+                            node.left = TreeNode(nodes[i])
+                            queue.append(node.left)
+                        i += 1
+                        if i < len(nodes) and nodes[i] is not None:
+                            node.right = TreeNode(nodes[i])
+                            queue.append(node.right)
+                        i += 1
+                    return root
 
-tests = {json.dumps(self.tests)}
-results = []
+                TREE_FUNCS = {{"isValidBST", "diameterOfBinaryTree", "isBalanced"}}
+                FUNC_NAME = {safe_func_name!r}
 
-func = getattr(solution, FUNC_NAME)
+                tests = json.loads({tests_json!r})
+                results = []
 
-for t in tests:
-    try:
-        args = dict(t["input"])
-        if FUNC_NAME in TREE_FUNCS and "root" in args:
-            args["root"] = build_tree(args["root"])
-        output = func(**args)
-        results.append({{
-            "input": t["input"],
-            "expected": t["expected"],
-            "output": output,
-            "passed": output == t["expected"]
-        }})
-    except Exception as e:
-        results.append({{
-            "input": t["input"],
-            "error": str(e),
-            "passed": False
-        }})
+                func = getattr(solution, FUNC_NAME)
 
-print(json.dumps(results))
-"""
+                for t in tests:
+                    try:
+                        args = dict(t["input"])
+                        if FUNC_NAME in TREE_FUNCS and "root" in args:
+                            args["root"] = build_tree(args["root"])
+                        output = func(**args)
+                        results.append({{
+                            "input": t["input"],
+                            "expected": t["expected"],
+                            "output": output,
+                            "passed": output == t["expected"]
+                        }})
+                    except Exception as e:
+                        results.append({{
+                            "input": t.get("input"),
+                            "error": str(e),
+                            "passed": False
+                        }})
+
+                print(json.dumps(results))
+            """).lstrip()
+
             runner_path = os.path.join(tmpdir, "runner.py")
             with open(runner_path, "w") as f:
                 f.write(runner_code)
