@@ -56,8 +56,8 @@ export default function Game() {
             console.log("starting round")
             send({ type: "start-round", roomid: id});
             //SET PHASE
+            startTurn();
         }
-        startTurn();
         
     }, [imposterId]);
 
@@ -150,6 +150,7 @@ export default function Game() {
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
+                        {(currentUser === imposterId &&
                         <Editor
                             height="600px"
                             width="100%"
@@ -158,7 +159,7 @@ export default function Game() {
                             theme="vs-dark"
                             value={code}
                             onChange={handleEditorChange}
-                        />
+                        />)}
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button
                                 onClick={runCode}
