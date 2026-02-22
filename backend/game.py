@@ -122,6 +122,32 @@ class Game:
         self.currentPlayer = self.currentPlayer.next
         self.currentPlayer.active = True
         return self.currentPlayer
+    
+    def determineWinner(self):
+        imposterWin = False
+        if not self.players:
+            return imposterWin
+
+        votes = {player: player.votes for player in self.players}
+
+        max_votes = max(votes.values())
+
+        candidates = [player for player, v in votes.items() if v == max_votes]
+
+        if len(candidates) > 1:
+            print("Tie! The imposter wins!")
+            imposterWin = True
+            return imposterWin  # Imposter wins
+
+        voted_off = candidates[0]
+
+        if voted_off.is_imposter():
+            print(f"{voted_off.userName} was the imposter! Crewmates win!")
+            return imposterWin # Imposter did not win
+        else:
+            print(f"{voted_off.userName} was not the imposter. Imposter wins!")
+            imposterWin = True
+            return imposterWin  # Imposter wins
 
 
     def addVote(self, playerid):
@@ -279,36 +305,67 @@ class Player(Node):
 
 
 if __name__ == "__main__":
-    game = Game("game1")
+    # --- Voting Process Tests ---
+    print("\n=== Voting Process Tests ===")
 
+    # Setup a fresh game with players
+    vote_game = Game("vote_test")
     p1 = Player(id="p1", websocket=None, userName="Alice")
     p2 = Player(id="p2", websocket=None, userName="Bob")
     p3 = Player(id="p3", websocket=None, userName="Charlie")
-    game.players = [p1, p2, p3]
+    vote_game.players = [p1, p2, p3]
 
-    question = game.selectQuestion(3)
-    print(f"\nQuestion loaded: {game.questionTitle} ({game.questionDifficulty})")
+    # Manually assign one imposter for deterministic testing
+    p2.role = "imposter"
 
-    solution_code = """
-def minRemoveToMakeValid(s):
-    stack = []
-    s = list(s)
-    for i, char in enumerate(s):
-        if char == '(':
-            stack.append(i)
-        elif char == ')':
-            if stack:
-                stack.pop()
-            else:
-                s[i] = ''
-    for i in stack:
-        s[i] = ''
-    return ''.join(s)
-    """
+    # Initialize votes
+    vote_game.setVotes()
+    print(f"Initial votes: {vote_game.getVotes()}")
 
-    game.commit("p1", solution_code)
-    print("\nCommit logs after player submission:")
-    print("\nRunning code against test cases...")
-    results = game.runCode()
-    print("Test results:")
-    print(results)
+    # --- Test 1: Crewmates correctly vote off the imposter ---
+    print("\n-- Test 1: Imposter gets the most votes --")
+    vote_game.setVotes()
+    vote_game.addVote("p2")  # Alice votes Bob
+    vote_game.addVote("p2")  # Charlie votes Bob
+    vote_game.addVote("p1")  # Bob votes Alice
+    print(f"Votes: {vote_game.getVotes()}")
+    result = vote_game.determineWinner()
+    print(result)
+
+    # --- Test 2: Crewmate gets voted off, imposter wins ---
+    print("\n-- Test 2: Crewmate gets the most votes --")
+    vote_game.setVotes()
+    vote_game.addVote("p1")  # Bob votes Alice
+    vote_game.addVote("p1")  # Charlie votes Alice
+    vote_game.addVote("p2")  # Alice votes Bob
+    print(f"Votes: {vote_game.getVotes()}")
+    result = vote_game.determineWinner()
+    print(result)
+
+    # --- Test 3: Tie vote — imposter wins by default ---
+    print("\n-- Test 3: Tie vote --")
+    vote_game.setVotes()
+    vote_game.addVote("p1")  # One vote for Alice
+    vote_game.addVote("p2")  # One vote for Bob
+    print(f"Votes: {vote_game.getVotes()}")
+    result = vote_game.determineWinner()
+    print(result )
+
+    # --- Test 4: No votes cast — all tied at 0 (imposter wins) ---
+    print("\n-- Test 4: No votes cast --")
+    vote_game.setVotes()
+    print(f"Votes: {vote_game.getVotes()}")
+    result = vote_game.determineWinner()
+    print(result)
+
+# --- Test 5: Single player game ---
+    print("\n-- Test 5: Single player (is the imposter) --")
+    solo_game = Game("solo_test")
+    solo = Player(id="s1", websocket=None, userName="Solo")
+    solo.role = "imposter"
+    solo_game.players = [solo]
+    solo_game.setVotes()
+    solo_game.addVote("s1")
+    print(f"Votes: {solo_game.getVotes()}")
+    result = solo_game.determineWinner()
+    print(result)
