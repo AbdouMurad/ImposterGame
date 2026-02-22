@@ -216,11 +216,11 @@ async def handler(websocket):
 
 async def main():
    
-    async with websockets.serve(handler, "localhost", 8765):
+    async with websockets.serve(handler, "0.0.0.0", 8765):
         
         game1 = create_room("123")
         print(game1.gameId)
-        print("Running on ws://localhost:8765")
+        print("Running on ws://0.0.0.0:8765")
         
         await asyncio.Future()  # run forever
 
