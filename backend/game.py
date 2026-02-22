@@ -10,16 +10,28 @@ class Commit:
 class Timer:
     def __init__(self, duration):
         self.duration = duration
+        self.running = False
 
     def startTime(self):
-        self.start_time = time.time()        
+        if not self.running:
+            self.start_time = time.time()
+            self.running = True
 
     def getTime(self):
         return time.time() - self.start_time
+        
     
     def getTimeLeft(self):
-        return round(self.duration - self.getTime())
+        timeleft = round(self.duration - self.getTime())
+        if timeleft < 0 and self.running:
+
+            timeleft = 0
+            self.running = False
+
+        return timeleft
         
+    
+
 class Game:
     def __init__(self, gameId):
         self.state = "waiting"
@@ -27,6 +39,8 @@ class Game:
         self.players = []
 
         self.turns = []
+
+        self.timer = None
 
         self.questionId = None
         self.questionTitle = ""
@@ -40,6 +54,7 @@ class Game:
         self.sourceCode = []
         
         self.currentPlayer: Player = None
+ 
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
@@ -65,7 +80,12 @@ class Game:
         self.setVotes()
         self.assignTurns()
         self.getQuestion()
+        
+
+    def startRound(self):
         self.state = "in-progress"
+
+
 
     async def addPlayer(self, id, websocket, name):
         player = Player(
@@ -121,6 +141,14 @@ class Game:
         self.currentPlayer.active = False
         self.currentPlayer = self.currentPlayer.next
         self.currentPlayer.active = True
+
+        self.emit({
+            "type": "next-turn",
+            "roomid": self.gameId,
+            "playerid": self.currentPlayer.id,
+            "name": self.currentPlayer.userName
+        })
+
         return self.currentPlayer
     
     def determineWinner(self):
@@ -201,7 +229,8 @@ class Game:
         self.commit("SYSTEM", question["starter_code"])
         self.questionDifficulty = question["difficulty"]
         self.questionTitle = question["title"]
-        self.questionCategory = question["category"]
+        self.questionCategory = "Test Category"
+        #self.questionCategory = question["category"]
         self.questionDesc = question["description"]
         self.questionExample = question["examples"]
         self.questionStarterCode = question["starter_code"]    

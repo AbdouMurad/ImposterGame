@@ -48,8 +48,8 @@
             "function_name": "solveEquation",
             "parameters": ["equation"]
         },
-        {
-            "id": 5,
+        { 
+            "id": 5, 
             "title": "Decode String",
             "category": "Stack",
             "difficulty": "Medium",

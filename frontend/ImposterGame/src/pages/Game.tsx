@@ -10,12 +10,14 @@ import { useWS } from "../contexts/WebSocketContext";
 
 import { useLocation } from "react-router-dom";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 export default function Game() {
     type Phase = "coding" | "voting" | "results"
     const { send, connected, lastMessage, error } = useWS();
     const [phase, setPhase] = useState<Phase>("coding");
+
+    const [roundActive, setRoundActive] = useState<boolean>(true);
 
     const [roomId, setRoomId] = useState<string>("");
     const [usernames, setUsernames] = useState<string[]>([]);
@@ -26,6 +28,14 @@ export default function Game() {
     const [highlightedUser, setHighlightedUser] = useState<string>("");
     const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
     const [code, setCode] = useState("// Start coding...");
+
+    const [time, setTime] = useState<number>(1);
+
+    //TODO : Add call to socket for problem info here
+    const [title, setTitle] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
+    const [examples, setExamples] = useState<string[]>([]);
+    // const [constraints] = useState<string[]>([]);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -41,6 +51,25 @@ export default function Game() {
     }, []);
 
     useEffect(() => {
+        send({ type: "start-round", roomid: id });
+        startTurn();
+    }, [imposterId]);
+
+    const startTurn = () => {
+        send({ type: "request-code", playerid: currentUser, name: currentUser, roomid: id });
+        send({ type: "request-time", roomid: id });
+    }
+
+    const timeLoop = () => {
+        console.log("[Game] Time left:", time);
+        if (time > 0 && currentUser == highlightedUser) {
+            send({ type: "request-time", roomid: id });
+        } else {
+            setRoundActive(false);
+        }
+    }
+
+    useEffect(() => {
         if (!lastMessage) return;
 
         console.log("[JoinForm] lastMessage:", lastMessage);
@@ -54,12 +83,23 @@ export default function Game() {
 
         if (type === "turn-list") {
             setUsernames(msg.players);
+            setHighlightedUser(msg.players[0]);
         } else if (type === "imposter-player") {
             setImposterId(msg.name);
+        } else if (type === "source-code") {
+            setCode(msg.code);
+            setTitle(msg.questionTitle);
+            setDescription(msg.questionDescription);
+            setExamples(msg.questionExamples);
+        } else if (type === "time-left") {
+            console.log("[Game] Received time-left:", msg.timeLeft);
+            setTime(parseInt(msg.timeLeft));
+            timeLoop();
+        } else if (type === "next-turn") {
+            setHighlightedUser(msg.name);
+            startTurn();
         }
     }, [lastMessage, navigate]);
-
-
 
     const handleEditorChange = (value: string | undefined) => {
         setCode(value || "");
@@ -88,17 +128,18 @@ export default function Game() {
                 </div>
                 <div className="flex flex-1">
                     {phase === "coding" ?
-                        (<SideBar Users={usernames} HighlightedUser={highlightedUser} />) :
-                        (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />)}
+                        (<SideBar Users={usernames} HighlightedUser={highlightedUser} Time={time} />) :
+                        (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} Time={time} />)}
                     {phase !== "results" ? (
                         imposterId ? (  // only render once imposterId is set
-                            currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />
+                            currentUser !== imposterId ? <ProblemPanel Title={title} Description={description} Examples={examples} /> : <ImposterPanel />
                         ) : (
                             <div className="text-gray-400">Loading...</div> // optional placeholder
                         )
                     ) : (
                         <ResultsPanel />
                     )}
+                    {/* <ProblemPanel Title={title} Description={description} Examples={examples} /> */}
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
