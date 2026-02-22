@@ -109,6 +109,7 @@ async def handler(websocket):
                 continue
             game = rooms[roomid]
             game.startGame()
+        
             print(f"Game in room {roomid} started")
 
             startResponse = {
@@ -117,7 +118,25 @@ async def handler(websocket):
             }
             await game.emit(startResponse)
 
-            
+        elif msg_type == "request-imposter":
+            playerid = data.get("playerid", None)
+            roomid = data.get("roomid", None)
+
+            game = rooms[roomid]
+            imposter = next((p for p in game.players if p.role == "imposter"), None)
+
+            if imposter is None:
+                await websocket.send(json.dumps({
+                    "type": "error", 
+                    "message": "No imposter found"}))
+                return
+
+            await websocket.send(json.dumps({
+                "type": "imposter-player",
+                "playerid": imposter.id,
+                "name": imposter.userName
+            }))
+
         elif msg_type == "request-list":
             roomid = data.get("roomid", None)
 

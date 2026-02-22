@@ -59,6 +59,10 @@ Frontend -> Backend:
         playerid
         roomid
 
+    request-imposter
+        playerid
+        roomid
+
 Backend -> Frontend
 
     #response to create-room
@@ -114,3 +118,8 @@ Backend -> Frontend
         commits : [
             [ playername , code] , [...], [...]
         ]
+
+    #response to request
+    imposter-player
+        playerid
+        name
