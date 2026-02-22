@@ -43,6 +43,8 @@ export default function Game() {
     const id = params.get("roomid") ?? "";
     const playerName = params.get("player") ?? "";
 
+    const [commits, setCommits] = useState<[]>([]);
+
     useEffect(() => {
         setRoomId(id);
         setCurrentUser(playerName);
@@ -110,10 +112,14 @@ export default function Game() {
             startTurn();
 
         } else if (type === "test-results") {
-            if (msg.results === "passed") {
+            if (msg.complete === "passed") {
                 setPhase("voting");
                 send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code });
+                send({ type: "request-logs", playerid: playerName, roomid: id });
             }
+        } else if (type === "log-list") {
+            setCommits(msg.logs);
+            console.log("Received commits:", msg.logs);
         }
     }, [lastMessage, navigate]);
 
@@ -122,7 +128,7 @@ export default function Game() {
     };
 
     const runCode = () => {
-        send({ type: "run-code", roomid: id, playerid: playerName, code: code });
+        send({ type: "run-code", roomid: id, playerid: playerName, sourcecode: code });
     };
 
     const handleCardClick = (username: string) => {
@@ -178,7 +184,7 @@ export default function Game() {
                             </button>
                         </div>
                     </div>)}
-                    {phase === "voting" && (<VersionPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} />)}
+                    {phase === "voting" && (<VersionPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} Commits={commits} />)}
                 </div>
             </div >
         </>
