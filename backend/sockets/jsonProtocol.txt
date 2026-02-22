@@ -83,6 +83,12 @@ Frontend -> Backend:
         roomid
         playerid
 
+    log-code
+        roomid
+        playerid
+        name
+        code
+
 Backend -> Frontend
 
     #response to create-room
@@ -101,6 +107,10 @@ Backend -> Frontend
     
 
     #response to request-list or emmited when new player joins room
+    log-list
+        logs : [[code, playerid], ...]
+
+
     player-list
         players : [name1, name2, ...]
     
@@ -122,6 +132,7 @@ Backend -> Frontend
     time-left
         roomid
         timeLeft
+        currentplayer
 
     #response to request-tests
     test-cases
@@ -158,6 +169,7 @@ Backend -> Frontend
         roomid
         playerid
         results
+        complete
     
     #response to add-vote
     vote-added

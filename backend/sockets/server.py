@@ -3,7 +3,7 @@ import websockets
 import json
 import random
 import string
-from backend.game import Game, Timer
+from backend.game import Game
 from backend.sockets.runner import Engine
 
 rooms = {} #ket = roomid, value = Game
@@ -120,15 +120,11 @@ async def handler(websocket):
             await game.emit(startResponse)
             
         elif msg_type == "request-order":
-            print("here")
-            print(data)
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
-            print(roomid, playerid)
             if roomid is None:
                 await websocket.send("No room ID provided")
                 continue
-            print(roomid)
             if not check_room(roomid):
                 await websocket.send("Room not found")
                 continue
@@ -144,15 +140,17 @@ async def handler(websocket):
             playerid = data.get("playerid", None)
             roomid = data.get("roomid", None)
 
+           
             game = rooms[roomid]
             imposter = next((p for p in game.players if p.role == "imposter"), None)
 
             if imposter is None:
                 await websocket.send(json.dumps({
-                    "type": "error", 
-                    "message": "No imposter found"}))
+                     "type": "error", 
+                     "message": "No imposter found"}))
                 return
-
+            
+            
             await websocket.send(json.dumps({
                 "type": "imposter-player",
                 "playerid": imposter.id,
@@ -177,11 +175,10 @@ async def handler(websocket):
             playerid = data.get("playerid", None)
 
             game = rooms[roomid]
-            
-            game.timer = Timer(60)
-            game.timer.startTime()
 
             source_code = game.getSourceCode()
+            
+            
             await websocket.send(json.dumps({
                 "type": "source-code",
                 "questionId": game.questionId,
@@ -193,41 +190,24 @@ async def handler(websocket):
                 "questionCategory": "Test Category",
                 "code": source_code
             }))
-        elif msg_type == "request-list":
-            roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
 
-            game = rooms[roomid]
-            await websocket.send(json.dumps(game.getListOfTurns()))
             
-        elif msg_type == "run-code":
-            roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
 
-            game = rooms[roomid]
-            if game.state == "in-progress":
-                source_code = data.get("source-code", None)
-                engine = Engine(source_code, game.getTestCases())
-                results = engine.runTests()
-                print(results)
-
-        elif msg_type == "request-time":
-            roomid = data.get("roomid", None)
+        # elif msg_type == "request-time":
+        #     roomid = data.get("roomid", None)
 
 
-            game = rooms[roomid]
-            timeLeft = game.timer.getTimeLeft()
+        #     game = rooms[roomid]
+        #     timeLeft = game.timer.getTimeLeft()
 
-            if timeLeft == 0:
-                self.game.nextTurn()
+        #     if timeLeft == 0:
+        #         await game.nextTurn()
 
-
-            print("Time left:", timeLeft)
-            await game.emit({
-                "type": "time-left",
-                "roomid": roomid,
-                "timeLeft": timeLeft
-            })
+        #     await game.emit({
+        #         "type": "time-left",
+        #         "roomid": roomid,
+        #         "timeLeft": timeLeft
+        #     })
 
         elif msg_type == "request-tests":
             roomid = data.get("roomid", None)
@@ -243,20 +223,20 @@ async def handler(websocket):
                 "tests": tests
             }))
 
-        elif msg_type == "request-logs":
-            roomid = data.get("roomid", None)
-            playerid = data.get("playerid", None)
+        # elif msg_type == "request-logs":
+        #     roomid = data.get("roomid", None)
+        #     playerid = data.get("playerid", None)
 
-            game = rooms[roomid]
-            commitLogs = game.getCommitLogs()
+        #     game = rooms[roomid]
+        #     commitLogs = game.getCommitLogs()
 
 
-            await websocket.send(json.dumps({
-                "type": "commitlogs-logs",
-                "playerid": playerid,
-                "roomid": roomid,
-                "commitLogs": commitLogs
-            }))
+        #     await websocket.send(json.dumps({
+        #         "type": "commit-logs",
+        #         "playerid": playerid,
+        #         "roomid": roomid,
+        #         "commitLogs": commitLogs
+        #     }))
 
         elif msg_type == "request-vote":
             roomid = data.get("roomid", None)
@@ -275,16 +255,34 @@ async def handler(websocket):
         elif msg_type == "start-round":
             roomid = data.get("roomid", None)
             game = rooms[roomid]
-            game.startRound()
+            await game.startRound()
+
+        elif msg_type == "request-logs":
+            roomid = data.get("roomid", None)
+            game = rooms[roomid]
+            print("SENDING LOGS")
+            await websocket.send(json.dumps({
+                "type": "log-list",
+                "logs": game.getCommitLogs()['Commits']}))
+
 
         elif msg_type == "run-code":
             roomid = data.get("roomid", None)
             playerid = data.get("playerid", None)
-            source_code = data.get("source-code", None)
+            source_code = data.get("sourcecode", None)
 
             game = rooms[roomid]
             if game.state == "in-progress":
                 results = game.runCode(source_code)
+
+                passed = True
+                scores = results[str(game.questionId)]['tests']
+                for score in scores:
+                    if score['passed'] == False:
+                        passed = False
+                        break
+                
+
                 all_passed = all(t["passed"] for t in results[str(game.questionId)]["tests"])
                 if all_passed:
                     game.commit(playerid, source_code)
@@ -292,44 +290,65 @@ async def handler(websocket):
                     "type": "test-results",
                     "roomid": roomid,
                     "playerid": playerid,
-                    "results": results
+                    "results": results,
+                    "complete": "passed" if passed else "failed"
                 }))
 
-            elif msg_type == "add-vote":
-                roomid = data.get("roomid", None)
-                playerid = data.get("playerid", None)       # the player casting the vote
-                targetid = data.get("targetid", None)      # the player being voted against
+        elif msg_type == "add-vote":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)       # the player casting the vote
+            targetid = data.get("targetid", None)      # the player being voted against
 
-                game = rooms[roomid]
-                if game.state == "voting":
-                    game.addVote(targetid)
-                    votes = game.getVotes()
+            game = rooms[roomid]
+            if game.state == "voting":
+                game.addVote(targetid)
+                votes = game.getVotes()
 
+                await game.emit({
+                    "type": "vote-added",
+                    "roomid": roomid,
+                    "votedFor": targetid,
+                    "votes": votes
+                })
+
+        elif msg_type == "determine-winner":
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+
+            game = rooms[roomid]
+            if game.state == "voting":
+                imposter_wins = game.determineWinner()
+                crewmate_wins = not imposter_wins
+                votes = game.getVotes()
+
+                await game.emit({
+                    "type": "game-over",
+                    "roomid": roomid,
+                    "imposterWins": imposter_wins,
+                    "crewmatesWin": crewmate_wins,
+                    "votes": votes
+                })
+        elif msg_type == "log-code":
+                    roomid = data.get("roomid", None)
+                    playerid = data.get("playerid", None)
+                    source_code = data.get("code", None)
+
+                    game = rooms[roomid]
+                    game.commit(playerid, source_code)
+
+                    # Push the new "latest commit" to ALL players to avoid race with request-code
                     await game.emit({
-                        "type": "vote-added",
-                        "roomid": roomid,
-                        "votedFor": targetid,
-                        "votes": votes
+                        "type": "source-code",
+                        "questionId": game.questionId,
+                        "questionCategory": game.questionCategory,
+                        "questionTitle": game.questionTitle,
+                        "questionDifficulty": game.questionDifficulty,
+                        "questionDescription": game.questionDesc,
+                        "questionExamples": game.questionExample,
+                        "code": game.getSourceCode(),
+                        "committedBy": playerid
                     })
-
-            elif msg_type == "determine-winner":
-                roomid = data.get("roomid", None)
-                playerid = data.get("playerid", None)
-
-                game = rooms[roomid]
-                if game.state == "voting":
-                    imposter_wins = game.determineWinner()
-                    crewmate_wins = not imposter_wins
-                    votes = game.getVotes()
-
-                    await game.emit({
-                        "type": "game-over",
-                        "roomid": roomid,
-                        "imposterWins": imposter_wins,
-                        "crewmatesWin": crewmate_wins,
-                        "votes": votes
-                    })
-
+            
         else:
             await websocket.send(f"Unknown message type: {msg_type}")
 

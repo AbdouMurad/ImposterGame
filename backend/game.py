@@ -1,36 +1,14 @@
 import random
 import json
 import time
-from sockets.runner import Engine
+import asyncio
+
+from backend.sockets.runner import Engine
 class Commit:
     def __init__(self, playerid, code):
         self.playerid = playerid
         self.code = code
 
-class Timer:
-    def __init__(self, duration):
-        self.duration = duration
-        self.running = False
-
-    def startTime(self):
-        if not self.running:
-            self.start_time = time.time()
-            self.running = True
-
-    def getTime(self):
-        return time.time() - self.start_time
-        
-    
-    def getTimeLeft(self):
-        timeleft = round(self.duration - self.getTime())
-        if timeleft < 0 and self.running:
-
-            timeleft = 0
-            self.running = False
-
-        return timeleft
-        
-    
 
 class Game:
     def __init__(self, gameId):
@@ -40,7 +18,8 @@ class Game:
 
         self.turns = []
 
-        self.timer = None
+        self.timer_task = None
+        self.time_left = 0
 
         self.questionId = None
         self.questionTitle = ""
@@ -54,7 +33,32 @@ class Game:
         self.sourceCode = []
         
         self.currentPlayer: Player = None
- 
+
+    async def stopTimer(self):
+        if self.timer_task and not self.timer_task.done():
+            self.timer_task.cancel()
+            try:
+                await self.timer_task
+            except asyncio.CancelledError:
+                pass
+        self.timer_task = None
+        self.time_left = 0
+
+    async def startTimer(self, seconds):
+        self.time_left = seconds
+        try:
+            while self.time_left > 0:
+                await self.emit({
+                    "type": "time-left",
+                    "roomid": self.gameId,
+                    "timeLeft": self.time_left,
+                    "currentPlayer": self.currentPlayer.userName if self.currentPlayer else ""
+                })
+                await asyncio.sleep(1)
+                self.time_left -= 1
+            await self.nextTurn()
+        except asyncio.CancelledError:
+            pass
 
     def commit(self, playerid, code) -> Commit:
         commit = Commit(playerid, code)
@@ -74,16 +78,22 @@ class Game:
            
         return commitLogs
 
+    def getSourceCode(self):
+        return self.sourceCode[len(self.sourceCode)-1][1]
+    
     def startGame(self):
         self.state = "initializing"
         self.assignRoles()
         self.setVotes()
         self.assignTurns()
-        self.getQuestion()
+        #self.getQuestion()
+        self.selectQuestion(2)
         
 
-    def startRound(self):
+    async def startRound(self):
         self.state = "in-progress"
+        await self.stopTimer()
+        self.timer_task = asyncio.create_task(self.startTimer(15))
 
 
 
@@ -98,8 +108,13 @@ class Game:
         await self.emit(self.getListOfPlayers())
 
     async def emit(self, message):
-        for player in self.players:
-            await player.websocket.send(json.dumps(message))
+        if not self.players:
+            return
+
+        await asyncio.gather(*[
+            player.websocket.send(json.dumps(message))
+            for player in self.players
+        ])
 
     def assignRoles(self):
         for player in self.players:
@@ -137,19 +152,19 @@ class Game:
 
         self.currentPlayer = root
 
-    def nextTurn(self):
+    async def nextTurn(self):
+        await self.stopTimer()
         self.currentPlayer.active = False
         self.currentPlayer = self.currentPlayer.next
         self.currentPlayer.active = True
-
-        self.emit({
+        await self.emit({
             "type": "next-turn",
-            "roomid": self.gameId,
-            "playerid": self.currentPlayer.id,
+            # was: self.currentPlayer.id
             "name": self.currentPlayer.userName
         })
+        # Start timer for the new turn
+        self.timer_task = asyncio.create_task(self.startTimer(15))
 
-        return self.currentPlayer
     
     def determineWinner(self):
         imposterWin = False
@@ -238,12 +253,8 @@ class Game:
         self.questionParameters.append(question["parameters"])
         return question
 
-    def getSourceCode(self):
-        print(self.sourceCode)
-        return self.sourceCode[len(self.sourceCode)-1][1]
-    
-    def runCode(self):
-        result = Engine(self.getSourceCode(), self.getTests(), self.questionFuncName).runTests()
+    def runCode(self, source_code):
+        result = Engine(source_code, self.getTests(), self.questionFuncName).runTests()
         
         if not result.stdout:
             return {str(self.questionId): {"tests": [{"error": result.stderr, "passed": False}]}}

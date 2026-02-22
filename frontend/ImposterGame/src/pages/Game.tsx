@@ -43,36 +43,40 @@ export default function Game() {
     const id = params.get("roomid") ?? "";
     const playerName = params.get("player") ?? "";
 
+    const [commits, setCommits] = useState<[]>([]);
+
     useEffect(() => {
         setRoomId(id);
         setCurrentUser(playerName);
         send({ type: "request-order", playerid: playerName, name: playerName, roomid: id });
-        send({ type: "request-imposter", playerid: currentUser, roomid: id });
+
     }, []);
 
     useEffect(() => {
-        send({ type: "start-round", roomid: id });
+
+        if (currentUser == highlightedUser) {
+            console.log("starting round")
+            send({ type: "start-round", roomid: id });
+            //SET PHASE
+        }
         startTurn();
+
     }, [imposterId]);
 
     const startTurn = () => {
         send({ type: "request-code", playerid: currentUser, name: currentUser, roomid: id });
-        send({ type: "request-time", roomid: id });
     }
 
-    const timeLoop = () => {
-        console.log("[Game] Time left:", time);
-        if (time > 0 && currentUser == highlightedUser) {
-            send({ type: "request-time", roomid: id });
-        } else {
-            setRoundActive(false);
-        }
-    }
+    // const timeLoop = () => {
+    //     if (time > 0 && currentUser == highlightedUser) {
+    //         send({ type: "request-time", roomid: id });
+    //     } else {
+    //         setRoundActive(false);
+    //     }
+    // }
 
     useEffect(() => {
         if (!lastMessage) return;
-
-        console.log("[JoinForm] lastMessage:", lastMessage);
 
         let msg: any = lastMessage;
         if (typeof msg === "string") {
@@ -81,9 +85,12 @@ export default function Game() {
 
         const type = msg?.type;
 
+        console.log("Received message:", lastMessage);
         if (type === "turn-list") {
             setUsernames(msg.players);
             setHighlightedUser(msg.players[0]);
+            send({ type: "request-imposter", playerid: playerName, roomid: id });
+
         } else if (type === "imposter-player") {
             setImposterId(msg.name);
         } else if (type === "source-code") {
@@ -91,13 +98,28 @@ export default function Game() {
             setTitle(msg.questionTitle);
             setDescription(msg.questionDescription);
             setExamples(msg.questionExamples);
+
         } else if (type === "time-left") {
-            console.log("[Game] Received time-left:", msg.timeLeft);
             setTime(parseInt(msg.timeLeft));
-            timeLoop();
+            setHighlightedUser(msg.currentPlayer);
+
         } else if (type === "next-turn") {
+            if (currentUser === highlightedUser) {
+                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code });
+            }
             setHighlightedUser(msg.name);
+
             startTurn();
+
+        } else if (type === "test-results") {
+            if (msg.complete === "passed") {
+                setPhase("voting");
+                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code });
+                send({ type: "request-logs", playerid: playerName, roomid: id });
+            }
+        } else if (type === "log-list") {
+            setCommits(msg.logs);
+            console.log("Received commits:", msg.logs);
         }
     }, [lastMessage, navigate]);
 
@@ -106,7 +128,7 @@ export default function Game() {
     };
 
     const runCode = () => {
-        // Add logic to execute the code here
+        send({ type: "run-code", roomid: id, playerid: playerName, sourcecode: code });
     };
 
     const handleCardClick = (username: string) => {
@@ -143,13 +165,16 @@ export default function Game() {
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
-                        <Editor
-                            height="600px"
-                            width="100%"
-                            defaultLanguage="python"
-                            defaultValue="// Start coding..."
-                            theme="vs-dark"
-                        />
+                        {(currentUser === highlightedUser &&
+                            <Editor
+                                height="600px"
+                                width="100%"
+                                defaultLanguage="python"
+                                defaultValue="// Start coding..."
+                                theme="vs-dark"
+                                value={code}
+                                onChange={handleEditorChange}
+                            />)}
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button
                                 onClick={runCode}
@@ -159,7 +184,7 @@ export default function Game() {
                             </button>
                         </div>
                     </div>)}
-                    {phase === "voting" && (<VersionPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} />)}
+                    {phase === "voting" && (<VersionPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} Commits={commits} />)}
                 </div>
             </div >
         </>

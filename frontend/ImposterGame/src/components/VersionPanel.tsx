@@ -4,23 +4,13 @@ import { GitCommitHorizontal } from "lucide-react";
 import { useState } from "react";
 import CommitCard from "./CommitCard";
 
-type Commit = {
-    index: number
-    username: string;
-    code: string
-}
-
 type VersionPanelProps = {
     HighlightedCommit: number;
     HandleCommitClick: (index: number) => void;
+    Commits: [];
 }
 
-export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
-    const [commits, setCommits] = useState<Commit[]>([{ index: 0, username: "James", code: "// Hello James" },
-    { index: 1, username: "Abdou", code: "// Hello Abdou" },
-    { index: 2, username: "Kevin", code: "// Hello Kevin" },
-    { index: 3, username: "Paolo", code: "// Hello Paolo" },
-    { index: 4, username: "Lem", code: "// Hello Lem" }]);
+export default function VersionPanel({ HighlightedCommit, HandleCommitClick, Commits }: VersionPanelProps) {
 
     return (
         <>
@@ -34,9 +24,9 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: V
                             Commits
                         </h1>
                         <div className="flex flex-col items-center ">
-                            {commits.map((commit) => (
-                                <div key={commit.index}>
-                                    <CommitCard Index={commit.index} Username={commit.username} IsFirst={commit.index === 0} IsLast={commit.index === commits.length - 1} Highlight={commit.index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
+                            {Commits.map((commit, index) => (
+                                <div key={index}>
+                                    <CommitCard Index={index} Username={commit[0]} IsFirst={index === 0} IsLast={index === Commits.length - 1} Highlight={index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
                                 </div>
                             ))}
                         </div>
@@ -47,7 +37,7 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: V
                             height="600px"
                             width="60%"
                             defaultLanguage="python"
-                            value={commits?.[HighlightedCommit]?.code}
+                            value={Commits?.[HighlightedCommit][1]}
                             theme="vs-dark"
                             options={{
                                 readOnly: true
