@@ -47,18 +47,18 @@ export default function Game() {
         setRoomId(id);
         setCurrentUser(playerName);
         send({ type: "request-order", playerid: playerName, name: playerName, roomid: id });
-        
+
     }, []);
-    
+
     useEffect(() => {
-        
+
         if (currentUser == highlightedUser) {
             console.log("starting round")
-            send({ type: "start-round", roomid: id});
+            send({ type: "start-round", roomid: id });
             //SET PHASE
         }
         startTurn();
-        
+
     }, [imposterId]);
 
     const startTurn = () => {
@@ -82,7 +82,7 @@ export default function Game() {
         }
 
         const type = msg?.type;
-        
+
         console.log("Received message:", lastMessage);
         if (type === "turn-list") {
             setUsernames(msg.players);
@@ -96,19 +96,24 @@ export default function Game() {
             setTitle(msg.questionTitle);
             setDescription(msg.questionDescription);
             setExamples(msg.questionExamples);
-        
+
         } else if (type === "time-left") {
             setTime(parseInt(msg.timeLeft));
             setHighlightedUser(msg.currentPlayer);
-            
+
         } else if (type === "next-turn") {
             if (currentUser === highlightedUser) {
-                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
+                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code });
             }
             setHighlightedUser(msg.name);
-            
+
             startTurn();
-            
+
+        } else if (type === "test-results") {
+            if (msg.results === "passed") {
+                setPhase("voting");
+                send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code });
+            }
         }
     }, [lastMessage, navigate]);
 
@@ -117,8 +122,7 @@ export default function Game() {
     };
 
     const runCode = () => {
-        // Add logic to execute the code here
-        console.log("Running code:", code);
+        send({ type: "run-code", roomid: id, playerid: playerName, code: code });
     };
 
     const handleCardClick = (username: string) => {
@@ -155,16 +159,16 @@ export default function Game() {
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
-                        {( currentUser === highlightedUser &&
-                        <Editor
-                            height="600px"
-                            width="100%"
-                            defaultLanguage="python"
-                            defaultValue="// Start coding..."
-                            theme="vs-dark"
-                            value={code}
-                            onChange={handleEditorChange}
-                        />)}
+                        {(currentUser === highlightedUser &&
+                            <Editor
+                                height="600px"
+                                width="100%"
+                                defaultLanguage="python"
+                                defaultValue="// Start coding..."
+                                theme="vs-dark"
+                                value={code}
+                                onChange={handleEditorChange}
+                            />)}
                         <div className="flex justify-end border-t-2 border-gray-700">
                             <button
                                 onClick={runCode}
