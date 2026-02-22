@@ -56,8 +56,8 @@ export default function Game() {
             console.log("starting round")
             send({ type: "start-round", roomid: id});
             //SET PHASE
-            startTurn();
         }
+        startTurn();
         
     }, [imposterId]);
 
@@ -101,8 +101,8 @@ export default function Game() {
             setTime(parseInt(msg.timeLeft));
             
         } else if (type === "next-turn") {
-            setHighlightedUser(msg.name);
             send({ type: "log-code", name: playerName, playerid: playerName, roomid: id, code: code});
+            setHighlightedUser(msg.name);
             startTurn();
         }
     }, [lastMessage, navigate]);
@@ -150,7 +150,7 @@ export default function Game() {
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
-                        {(currentUser === imposterId &&
+                        {( currentUser === highlightedUser &&
                         <Editor
                             height="600px"
                             width="100%"
