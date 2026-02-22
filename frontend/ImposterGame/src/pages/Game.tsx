@@ -4,23 +4,62 @@ import VoteSideBar from "../components/VoteSideBar.tsx";
 import ProblemPanel from "../components/ProblemPanel.tsx";
 import ImposterPanel from "../components/ImposterPanel.tsx";
 import VersionPanel from "../components/VersionPanel.tsx";
+import ResultsPanel from "../components/ResultsPanel.tsx";
+import { useNavigate } from "react-router-dom";
+import { useWS } from "../contexts/WebSocketContext";
 
-import { useState } from "react";
+import { useLocation } from "react-router-dom";
+
+import { useState, useEffect } from "react";
 
 export default function Game() {
-    type Phase = "coding" | "voting"
-    // TODO: Add call to game phase here
-    const [phase, setPhase] = useState<Phase>("voting");
-    // TODO: Add call to users here
-    const [usernames, setUsernames] = useState<string[]>(["James", "Abdou", "Kevin", "Paolo", "Lem"]);
-    // TODO: Integrate with join and create forms
-    const [currentUser, setcurrentUser] = useState<string>("James");
+    type Phase = "coding" | "voting" | "results"
+    const { send, connected, lastMessage, error } = useWS();
+    const [phase, setPhase] = useState<Phase>("coding");
+
+    const [roomId, setRoomId] = useState<string>("");
+    const [usernames, setUsernames] = useState<string[]>([]);
+    const [currentUser, setCurrentUser] = useState<string>("");
     // TODO: Add call to imposter here
-    const [imposterId, setImposterId] = useState<string>("James");
+    const [imposterId, setImposterId] = useState<string>("");
     // TODO: Add call to current user here
-    const [highlightedUser, setHighlightedUser] = useState<string>("Abdou");
+    const [highlightedUser, setHighlightedUser] = useState<string>("");
     const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
     const [code, setCode] = useState("// Start coding...");
+
+    const navigate = useNavigate();
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const id = params.get("roomid") ?? "";
+    const playerName = params.get("player") ?? "";
+
+    useEffect(() => {
+        setRoomId(id);
+        setCurrentUser(playerName);
+        send({ type: "request-order", playerid: currentUser, name: currentUser, roomid: id });
+        send({ type: "request-imposter", playerid: currentUser, roomid: id });
+    }, []);
+
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        console.log("[JoinForm] lastMessage:", lastMessage);
+
+        let msg: any = lastMessage;
+        if (typeof msg === "string") {
+            try { msg = JSON.parse(msg); } catch { /* keep as string */ }
+        }
+
+        const type = msg?.type;
+
+        if (type === "turn-list") {
+            setUsernames(msg.players);
+        } else if (type === "imposter-player") {
+            setImposterId(msg.id);
+        }
+    }, [lastMessage, navigate]);
+
+
 
     const handleEditorChange = (value: string | undefined) => {
         setCode(value || "");
@@ -48,9 +87,12 @@ export default function Game() {
                     </h1>
                 </div>
                 <div className="flex flex-1">
-                    {phase === "coding" && (<SideBar Users={usernames} HighlightedUser={highlightedUser} />)}
-                    {phase === "voting" && (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />)}
-                    {currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />}
+                    {phase === "coding" ?
+                        (<SideBar Users={usernames} HighlightedUser={highlightedUser} />) :
+                        (<VoteSideBar Users={usernames} HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />)}
+                    {phase !== "results" ?
+                        (currentUser !== imposterId ? <ProblemPanel /> : <ImposterPanel />) :
+                        (<ResultsPanel />)}
                     {phase === "coding" && (<div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
                         <div className="border-b-2 border-gray-700 h-5">
                         </div>
