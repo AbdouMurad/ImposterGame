@@ -86,7 +86,8 @@ class Game:
         self.assignRoles()
         self.setVotes()
         self.assignTurns()
-        self.getQuestion()
+        #self.getQuestion()
+        self.selectQuestion(2)
         
 
     async def startRound(self):

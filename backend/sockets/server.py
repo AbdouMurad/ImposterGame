@@ -265,6 +265,15 @@ async def handler(websocket):
             game = rooms[roomid]
             if game.state == "in-progress":
                 results = game.runCode(source_code)
+
+                passed = True
+                scores = results[str(game.questionId)]['tests']
+                for score in scores:
+                    if score['passed'] == False:
+                        passed = False
+                        break
+                
+
                 all_passed = all(t["passed"] for t in results[str(game.questionId)]["tests"])
                 if all_passed:
                     game.commit(playerid, source_code)
@@ -272,7 +281,8 @@ async def handler(websocket):
                     "type": "test-results",
                     "roomid": roomid,
                     "playerid": playerid,
-                    "results": results
+                    "results": results,
+                    "complete": "passed" if passed else "failed"
                 }))
 
         elif msg_type == "add-vote":
