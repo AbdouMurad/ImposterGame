@@ -117,7 +117,27 @@ async def handler(websocket):
                 "roomid": roomid
             }
             await game.emit(startResponse)
+        elif msg_type == "request-order":
+            print("here")
+            print(data)
+            roomid = data.get("roomid", None)
+            playerid = data.get("playerid", None)
+            print(roomid, playerid)
+            if roomid is None:
+                await websocket.send("No room ID provided")
+                continue
+            print(roomid)
+            if not check_room(roomid):
+                await websocket.send("Room not found")
+                continue
+            game = rooms[roomid]
+            order = game.getOrder()
 
+            orderResponse = {
+                "type": "turn-list",
+                "players": order
+            }
+            await websocket.send(json.dumps(orderResponse))
         elif msg_type == "request-imposter":
             playerid = data.get("playerid", None)
             roomid = data.get("roomid", None)
