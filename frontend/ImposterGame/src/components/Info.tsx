@@ -9,7 +9,7 @@ export default function JoinForm({ onInfoExitClick }: JoinFormProps) {
         <>
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
                 <div className="relative border border-gray-700 bg-gray-900 w-100 h-100 rounded-lg">
-                    <h1 className="text-xl text-gray-200 font-bold p-4">Info</h1>
+                    <h1 className="text-xl text-white font-bold p-4">Info</h1>
                     <button
                         type="button"
                         className="absolute top-2 right-2 text-white cursor-pointer"

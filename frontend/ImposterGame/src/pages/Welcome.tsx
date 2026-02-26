@@ -19,12 +19,12 @@ export default function Welcome() {
                     <button
                         type="button"
                         onClick={() => setIsInfoOpen(true)}
-                        className="m-5 p-2 rounded-xl text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300 cursor-pointer">
+                        className="m-5 p-2 rounded-xl text-gray-200 bg-purple-700 hover:bg-purple-600 transition-colors duration-300 cursor-pointer">
                         <CircleQuestionMark size={24} />
                     </button>
                     <a
                         href="https://github.com/AbdouMurad/ImposterGame"
-                        className="m-5 p-2 rounded-xl text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300"
+                        className="m-5 p-2 rounded-xl text-gray-200 bg-purple-700 hover:bg-purple-600 transition-colors duration-300"
                     >
                         <Github size={24} />
                     </a>
@@ -40,14 +40,14 @@ export default function Welcome() {
                     <button
                         type="button"
                         onClick={() => setIsJoinOpen(true)}
-                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-700 hover:bg-purple-600 transition-colors duration-300">
                         Join Room
                     </button>
 
                     <button
                         type="button"
                         onClick={() => setIsCreateOpen(true)}
-                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300">
+                        className="cursor-pointer w-30 m-2 p-3 mt-10 rounded-xl font-bold text-sm text-gray-200 bg-purple-700 hover:bg-purple-600 transition-colors duration-300">
                         Create Room
                     </button>
 

@@ -3,8 +3,6 @@ import { createContext, useContext, useState } from "react";
 const GameContext = createContext({
     gameState: "",
     time: 0,
-    roomId: "",
-    username: "",
     players: [],
     currentPlayer: "",
     imposter: "",
@@ -20,11 +18,9 @@ const GameContext = createContext({
 });
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
-    const [gameState, setGameState] = useState("voting");
+    const [gameState, setGameState] = useState("coding");
     const [time, setTime] = useState(0);
 
-    const [roomId, setRoomId] = useState("");
-    const [username, setUsername] = useState("");
     const [players, setPlayers] = useState([]);
     const [currentPlayer, setCurrentPlayer] = useState("james");
     const [imposter, setImposter] = useState("");
@@ -43,8 +39,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const value = {
         gameState,
         time,
-        roomId,
-        username,
         players,
         currentPlayer,
         imposter,

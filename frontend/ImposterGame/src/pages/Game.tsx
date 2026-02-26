@@ -4,10 +4,12 @@ import SideBar from "../components/SideBar.tsx";
 import VoteSideBar from "../components/VoteSideBar.tsx";
 import ProblemPanel from "../components/ProblemPanel.tsx";
 import ImposterPanel from "../components/ImposterPanel.tsx";
+import EditorPanel from "../components/EditorPanel.tsx";
 import CommitPanel from "../components/CommitPanel.tsx";
 
 import { useState } from "react";
 
+import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 
 export default function Game() {
@@ -15,10 +17,13 @@ export default function Game() {
     const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
 
     const {
-        gameState,
-        time,
         roomId,
         username,
+    } = useRoom();
+
+    const {
+        gameState,
+        time,
         players,
         currentPlayer,
         imposter,
@@ -30,14 +35,6 @@ export default function Game() {
         code,
         commits
     } = useGame();
-
-    const handleEditorChange = (code: string | undefined) => {
-
-    };
-
-    const runCode = () => {
-
-    };
 
     const handleCardClick = (username: string) => {
         setHighlightedUser(username)
@@ -60,29 +57,7 @@ export default function Game() {
                     (<div className="flex flex-1">
                         <SideBar HighlightedUser={highlightedUser} />
                         {username === imposter ? <ImposterPanel /> : <ProblemPanel />}
-                        <div className="w-[50%] rounded-xl bg-gray-950 border-2 border-gray-700 m-3">
-                            <div className="border-b-2 border-gray-700 h-5">
-                            </div>
-                            {(currentPlayer === highlightedUser ?
-                                <Editor
-                                    height="600px"
-                                    width="100%"
-                                    defaultLanguage="python"
-                                    defaultValue="// Start coding..."
-                                    theme="vs-dark"
-                                    value={code}
-                                    onChange={handleEditorChange}
-                                /> :
-                                <div className="h-[600px]"></div>)}
-                            <div className="flex justify-end border-t-2 border-gray-700">
-                                <button
-                                    onClick={runCode}
-                                    className="cursor-pointer w-20 m-2 p-3 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-900 transition-colors duration-300"
-                                >
-                                    Run
-                                </button>
-                            </div>
-                        </div>
+                        <EditorPanel />
                     </div>)}
                 {gameState === "voting" &&
                     (<div className="flex flex-1">

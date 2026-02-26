@@ -1,11 +1,16 @@
 import LobbyUserCard from "../components/LobbyUserCard.tsx";
 
+import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 
 export default function Lobby() {
   const {
     roomId,
     players,
+  } = useRoom();
+
+  const {
+
   } = useGame();
 
 
