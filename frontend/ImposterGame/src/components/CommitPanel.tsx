@@ -1,16 +1,19 @@
-import Editor from "@monaco-editor/react";
-
 import { GitCommitHorizontal } from "lucide-react";
-import { useState } from "react";
-import CommitCard from "./CommitCard";
+
+import Editor from "@monaco-editor/react";
+import CommitCard from "./CommitCard.tsx";
+
+import { useGame } from "../contexts/GameContext.tsx";
 
 type VersionPanelProps = {
     HighlightedCommit: number;
     HandleCommitClick: (index: number) => void;
-    Commits: [];
 }
 
-export default function VersionPanel({ HighlightedCommit, HandleCommitClick, Commits }: VersionPanelProps) {
+export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
+    const {
+        commits
+    } = useGame();
 
     return (
         <>
@@ -24,9 +27,9 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick, Com
                             Commits
                         </h1>
                         <div className="flex flex-col items-center ">
-                            {Commits.map((commit, index) => (
+                            {commits.map((commit, index) => (
                                 <div key={index}>
-                                    <CommitCard Index={index} Username={commit[0]} IsFirst={index === 0} IsLast={index === Commits.length - 1} Highlight={index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
+                                    <CommitCard Index={index} Username={commit[0]} IsFirst={index === 0} IsLast={index === commits.length - 1} Highlight={index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
                                 </div>
                             ))}
                         </div>
@@ -37,7 +40,7 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick, Com
                             height="600px"
                             width="60%"
                             defaultLanguage="python"
-                            value={Commits?.[HighlightedCommit][1]}
+                            value={commits?.[HighlightedCommit][1]}
                             theme="vs-dark"
                             options={{
                                 readOnly: true
@@ -51,7 +54,7 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick, Com
                             </div>
                         </div>)}
                 </div>
-                <div className="flex justify-end border-t-2 border-gray-700">
+                <div className="flex justify-end border-t-2 border-gray-700 h-15">
                 </div>
             </div>
         </>

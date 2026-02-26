@@ -1,16 +1,17 @@
 import VoteUserCard from "./VoteUserCard.tsx";
 
-import { useState } from "react";
+import { useGame } from "../contexts/GameContext.tsx";
 
 type VoteBarProps = {
-    Users: string[];
     HighlightedUser: string;
     HandleCardClick: (username: string) => void;
 }
 
-export default function VoteBar({ Users, HighlightedUser, HandleCardClick }: VoteBarProps) {
-    // TODO: Add call to socket for time here
-    const [time, setTime] = useState<Number>(300);
+export default function VoteBar({ HighlightedUser, HandleCardClick }: VoteBarProps) {
+    const {
+        time,
+        players
+    } = useGame();
 
     const castVote = () => {
         // Add logic to cast vote here
@@ -18,19 +19,21 @@ export default function VoteBar({ Users, HighlightedUser, HandleCardClick }: Vot
 
     return (
         <>
-            <div className="w-[15%] bg-gray-900 my-3 mr-10 border-y-2 border-r-2 border-gray-700 rounded-r-xl">
-                <div className="text-gray-400 m-5 text-sm mb-10 ">
-                    Time until voting ends:
-                    <br />
-                    <strong className="font-bold text-white">
-                        {Math.floor(time / 60)}:{String(time % 60).padStart(2, '0')}
-                    </strong>
-                </div>
-                {Users.map((user) => (
-                    <div key={user}>
-                        <VoteUserCard Username={user} Highlight={user === HighlightedUser} HandleCardClick={HandleCardClick} />
+            <div className="flex flex-col justify-between w-[15%] bg-gray-900 my-3 mr-10 border-y-2 border-r-2 border-gray-700 rounded-r-xl">
+                <div>
+                    <div className="text-gray-400 m-5 text-sm mb-10 ">
+                        Time until voting ends:
+                        <br />
+                        <strong className="font-bold text-white">
+                            {Math.floor(time / 60)}:{String(time % 60).padStart(2, '0')}
+                        </strong>
                     </div>
-                ))}
+                    {players.map((player) => (
+                        <div key={player}>
+                            <VoteUserCard Username={player} Highlight={player === HighlightedUser} HandleCardClick={HandleCardClick} />
+                        </div>
+                    ))}
+                </div>
                 <div className="flex justify-end">
                     <button
                         onClick={castVote}

@@ -1,38 +1,36 @@
-import { useState } from "react";
+import { useGame } from "../contexts/GameContext.tsx";
 
-type ProblemPanelProps = {
-    Title: string;
-    Description: string;
-    Examples: string[];
-}
+export default function ProblemPanel() {
+    const {
+        problemTitle,
+        problemDescription,
+        problemExamples,
+        problemConstraints,
+    } = useGame();
 
-export default function ProblemPanel({ Title, Description, Examples }: ProblemPanelProps) {
     return (
         <>
             <div className="w-[35%] bg-gray-950 rounded-xl my-3 border-2 border-gray-700">
                 <h1 className="text-gray-200 font-bold m-7 text-2xl">
-                    {Title}
+                    {problemTitle}
                 </h1>
                 <div className="text-gray-400 m-7">
-                    {Description}
+                    {problemDescription}
                     <br />
                     <br />
-                    {/* <strong className="text-gray-300">Examples:</strong> */}
-                    <div className="whitespace-pre-line">
-                        {Examples}
-                    </div>
-                    {/* {Examples.map((example) => (
+                    <strong className="text-gray-300">Examples:</strong>
+                    {problemExamples.map((example) => (
                         <div key={example} className="bg-gray-900 p-3 m-2 rounded-xl">
                             {example}
                         </div>
-                    ))} */}
-                    {/* <br />
+                    ))}
+                    <br />
                     <strong className="text-gray-300">Constraints:</strong>
-                    {constraints.map((constraint) => (
+                    {problemConstraints.map((constraint) => (
                         <div key={constraint} className="bg-gray-900 p-3 m-2 rounded-xl">
                             {constraint}
                         </div>
-                    ))} */}
+                    ))}
                 </div>
             </div>
         </>

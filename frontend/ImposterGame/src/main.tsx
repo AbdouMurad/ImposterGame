@@ -1,16 +1,16 @@
 import { BrowserRouter } from 'react-router-dom'
+import { GameProvider } from './contexts/GameContext.tsx'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { WebSocketProvider } from './contexts/WebSocketContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <WebSocketProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <GameProvider>
         <App />
-      </BrowserRouter>
-    </WebSocketProvider>
+      </GameProvider>
+    </BrowserRouter>
   </React.StrictMode>
 )

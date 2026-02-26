@@ -1,6 +1,12 @@
 import { Cctv } from "lucide-react";
 
+import { useGame } from "../contexts/GameContext.tsx";
+
 export default function ImposterPanel() {
+    const {
+        problemTopics
+    } = useGame()
+
     return (
         <>
             <div className="w-[35%] bg-gray-950 rounded-xl my-3 border-2 border-gray-700">
@@ -14,7 +20,11 @@ export default function ImposterPanel() {
                     <br />
                     <strong className="text-gray-300">Hint:</strong>
                     <div className="bg-gray-900 p-3 m-2 rounded-xl">
-                        Graphs, Queue
+                        {problemTopics.map((topic) => (
+                            <div key={topic}>
+                                topic
+                            </div>
+                        ))}
                     </div>
                 </div>
 

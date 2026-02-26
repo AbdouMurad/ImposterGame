@@ -1,72 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { useWS } from "../contexts/WebSocketContext";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 type CreateFormProps = {
   onCancelCreateClick: () => void;
 };
 
 export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
-  const { send, connected, lastMessage } = useWS();
-  const [roomId, setRoomId] = useState<string | null>(null);
-  // removed: const [gameStarted, setGameStarted] = useState(false);
+  const [username, setUsername] = useState("");
 
-  const [name, setName] = useState("Player" + Math.floor(Math.random() * 1000));
-  const pollingRef = useRef<number | null>(null);
-  const [waitingForCreate, setWaitingForCreate] = useState(false);
+  function onCreateClick() {
 
-  const navigate = useNavigate();
-
-  // handle incoming messages from the server
-  useEffect(() => {
-    if (!lastMessage) return;
-
-    try {
-      console.log("[CreateForm] Received WS message:", lastMessage);
-    } catch (e) {
-      console.log("[CreateForm] Received WS message (unserializable):", lastMessage);
-    }
-
-    if (typeof lastMessage === "object") {
-      const t = lastMessage.type;
-      if (t === "room-created") {
-        const rid = lastMessage.roomid ?? lastMessage.roomId ?? null;
-        if (rid) {
-          setRoomId(rid);
-          // If we issued the create request from this component, navigate now
-          if (waitingForCreate) {
-            setWaitingForCreate(false);
-            // include player's name so Lobby can highlight it
-            navigate(
-              `/GameRoom/lobby?roomid=${encodeURIComponent(rid)}&player=${encodeURIComponent(name)}`
-            );
-          }
-        }
-      }
-      // removed handling for "game-started" since this component doesn't need to track it
-    }
-  }, [lastMessage, waitingForCreate, navigate]);
-
-  // (existing polling effect is fine if you keep it)
-  useEffect(() => {
-    if (!roomId) return;
-    const ask = () => {
-      if (connected && roomId) send({ type: "request-list", roomid: roomId });
-    };
-    ask();
-    pollingRef.current = window.setInterval(ask, 2000);
-    return () => {
-      if (pollingRef.current) {
-        window.clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
-  }, [roomId, connected, send]);
-
-  function onCreateRoom() {
-    // include both playerid and name; wait for reply before navigating
-    send({ type: "create-room", playerid: name, name });
-    setWaitingForCreate(true);
   }
 
   return (
@@ -81,8 +23,8 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
               type="text"
               id="joinCode"
               placeholder="Enter username"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="border rounded bg-gray-900 text-white px-3 py-1"
             />
           </div>
@@ -98,11 +40,10 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
 
             <button
               type="button"
-              onClick={onCreateRoom}
-              disabled={!connected || waitingForCreate}
+              onClick={onCreateClick}
               className="cursor-pointer w-20 p-3 m-2 rounded-xl font-bold text-xs text-gray-200 bg-purple-950 hover:bg-purple-900 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {waitingForCreate ? "Creating..." : "Create"}
+              Create
             </button>
           </div>
         </form>

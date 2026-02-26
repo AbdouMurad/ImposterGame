@@ -1,6 +1,13 @@
 import LobbyUserCard from "../components/LobbyUserCard.tsx";
 
+import { useGame } from "../contexts/GameContext.tsx";
+
 export default function Lobby() {
+  const {
+    roomId,
+    players,
+  } = useGame();
+
 
   async function copyCode() {
 
@@ -26,11 +33,11 @@ export default function Lobby() {
             <h1 className="text-gray-200 font-bold m-7 text-2xl">
               Players
             </h1>
-            <LobbyUserCard />
-            <LobbyUserCard />
-            <LobbyUserCard />
-            <LobbyUserCard />
-            <LobbyUserCard />
+            {players.map((player) => (
+              <div key={player}>
+                <LobbyUserCard Username={player} />
+              </div>
+            ))}
           </div>
           <div className="flex flex-col justify-between w-[20%] border-2 border-gray-700 text-gray-200 rounded-xl m-1 bg-gray-900 my-10 h-[500px]">
             <div>
@@ -38,7 +45,7 @@ export default function Lobby() {
                 Room Code:
               </h1>
               <h1 onClick={copyCode} className="text-purple-600 font-bold mx-7 text-xl cursor-pointer rounded-xl">
-                ABC123
+                {roomId}
               </h1>
             </div>
             <div className="flex justify-center">
