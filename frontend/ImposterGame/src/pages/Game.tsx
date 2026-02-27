@@ -13,9 +13,6 @@ import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 
 export default function Game() {
-    const [highlightedUser, setHighlightedUser] = useState<string>("");
-    const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
-
     const {
         roomId,
         username,
@@ -36,14 +33,6 @@ export default function Game() {
         commits
     } = useGame();
 
-    const handleCardClick = (username: string) => {
-        setHighlightedUser(username)
-    };
-
-    const handleCommitClick = (index: number) => {
-        setHighlightedCommit(index)
-    };
-
     return (
         <>
             <div className="h-screen bg-gray-950">
@@ -55,15 +44,15 @@ export default function Game() {
                 </div>
                 {gameState === "coding" &&
                     (<div className="flex flex-1">
-                        <SideBar HighlightedUser={highlightedUser} />
+                        <SideBar />
                         {username === imposter ? <ImposterPanel /> : <ProblemPanel />}
                         <EditorPanel />
                     </div>)}
                 {gameState === "voting" &&
                     (<div className="flex flex-1">
-                        <VoteSideBar HighlightedUser={highlightedUser} HandleCardClick={handleCardClick} />
+                        <VoteSideBar />
                         {username === imposter ? <ImposterPanel /> : <ProblemPanel />}
-                        <CommitPanel HighlightedCommit={highlightedCommit} HandleCommitClick={handleCommitClick} />
+                        <CommitPanel />
                     </div>)}
                 {/* {phase === "coding" ?
                         (<SideBar Users={usernames} HighlightedUser={highlightedUser} Time={time} />) :

@@ -1,19 +1,22 @@
 import { GitCommitHorizontal } from "lucide-react";
 
+import { useState } from "react";
+
 import Editor from "@monaco-editor/react";
 import CommitCard from "./CommitCard.tsx";
 
 import { useGame } from "../contexts/GameContext.tsx";
 
-type VersionPanelProps = {
-    HighlightedCommit: number;
-    HandleCommitClick: (index: number) => void;
-}
+export default function VersionPanel() {
+    const [highlightedCommit, setHighlightedCommit] = useState<number>(-1);
 
-export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: VersionPanelProps) {
     const {
         commits
     } = useGame();
+
+    const handleCommitClick = (index: number) => {
+        setHighlightedCommit(index)
+    };
 
     return (
         <>
@@ -29,18 +32,18 @@ export default function VersionPanel({ HighlightedCommit, HandleCommitClick }: V
                         <div className="flex flex-col items-center ">
                             {commits.map((commit, index) => (
                                 <div key={index}>
-                                    <CommitCard Index={index} Username={commit[0]} IsFirst={index === 0} IsLast={index === commits.length - 1} Highlight={index === HighlightedCommit} HandleCommitClick={HandleCommitClick} />
+                                    <CommitCard index={index} username={commit[0]} isFirst={index === 0} isLast={index === commits.length - 1} highlight={index === highlightedCommit} handleCommitClick={handleCommitClick} />
                                 </div>
                             ))}
                         </div>
 
                     </div>
-                    {HighlightedCommit !== -1 ? (
+                    {highlightedCommit !== -1 ? (
                         <Editor
                             height="600px"
                             width="60%"
                             defaultLanguage="python"
-                            value={commits?.[HighlightedCommit][1]}
+                            value={commits?.[highlightedCommit][1]}
                             theme="vs-dark"
                             options={{
                                 readOnly: true

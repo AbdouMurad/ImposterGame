@@ -1,17 +1,20 @@
 import VoteUserCard from "./VoteUserCard.tsx";
 
+import { useState } from "react";
+
 import { useGame } from "../contexts/GameContext.tsx";
 
-type VoteBarProps = {
-    HighlightedUser: string;
-    HandleCardClick: (username: string) => void;
-}
+export default function VoteBar() {
+    const [highlightedCard, setHighlightedCard] = useState("");
 
-export default function VoteBar({ HighlightedUser, HandleCardClick }: VoteBarProps) {
     const {
         time,
         players
     } = useGame();
+
+    const handleCardClick = (username: string) => {
+        setHighlightedCard(username)
+    };
 
     const castVote = () => {
         // Add logic to cast vote here
@@ -30,7 +33,7 @@ export default function VoteBar({ HighlightedUser, HandleCardClick }: VoteBarPro
                     </div>
                     {players.map((player) => (
                         <div key={player}>
-                            <VoteUserCard Username={player} Highlight={player === HighlightedUser} HandleCardClick={HandleCardClick} />
+                            <VoteUserCard username={player} highlight={player === highlightedCard} handleCardClick={handleCardClick} />
                         </div>
                     ))}
                 </div>

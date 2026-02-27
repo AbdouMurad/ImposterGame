@@ -2,13 +2,10 @@ import UserCard from "./UserCard.tsx";
 
 import { useGame } from "../contexts/GameContext.tsx";
 
-type SideBarProps = {
-    HighlightedUser: string;
-}
-
-export default function SideBar({ HighlightedUser }: SideBarProps) {
+export default function SideBar() {
     const {
-        players, 
+        players,
+        currentPlayer,
         time
     } = useGame();
 
@@ -24,7 +21,7 @@ export default function SideBar({ HighlightedUser }: SideBarProps) {
                 </div>
                 {players.map((player) => (
                     <div key={player}>
-                        <UserCard Username={player} Highlight={player === HighlightedUser} />
+                        <UserCard username={player} highlight={player === currentPlayer} />
                     </div>
                 ))}
             </div>

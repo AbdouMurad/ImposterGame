@@ -22,7 +22,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const [time, setTime] = useState(0);
 
     const [players, setPlayers] = useState([]);
-    const [currentPlayer, setCurrentPlayer] = useState("james");
+    const [currentPlayer, setCurrentPlayer] = useState("");
     const [imposter, setImposter] = useState("");
 
     const [problemTitle, setProblemTitle] = useState("");

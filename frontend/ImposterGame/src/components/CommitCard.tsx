@@ -1,32 +1,32 @@
 import { File } from "lucide-react";
 
 type CommitCardProps = {
-    Index: number;
-    Username: string;
-    IsFirst: boolean;
-    IsLast: boolean;
-    Highlight: boolean;
-    HandleCommitClick: (index: number) => void;
+    index: number;
+    username: string;
+    isFirst: boolean;
+    isLast: boolean;
+    highlight: boolean;
+    handleCommitClick: (index: number) => void;
 };
 
-export default function CommitCard({ Index, Username, IsFirst, IsLast, Highlight, HandleCommitClick }: CommitCardProps) {
+export default function CommitCard({ index, username, isFirst, isLast, highlight, handleCommitClick }: CommitCardProps) {
     return (
         <>
             <div
-                onClick={() => HandleCommitClick(Index)}
+                onClick={() => handleCommitClick(index)}
                 className={`flex items-center w-60 h-15 border-x-2 border-t-2 border-gray-700 text-sm cursor-pointer
                     ${Highlight ? "bg-purple-900" : "bg-gray-900"}
-                    ${IsFirst ? "rounded-t-md" : "rounded-t-none"}
-                    ${IsLast ? "rounded-b-md" : "rounded-b-none"}
-                    ${IsLast ? "border-b-2" : "border-b-none"}`}
+                    ${isFirst ? "rounded-t-md" : "rounded-t-none"}
+                    ${isLast ? "rounded-b-md" : "rounded-b-none"}
+                    ${isLast ? "border-b-2" : "border-b-none"}`}
             >
                 <div className="m-2 text-gray-300">
                     <div className="flex">
                         <File size={16} className="mr-2" />
-                        {Username}
+                        {username}
                     </div>
                     <div className="text-xs text-gray-500">
-                        Commit #{Index + 1}
+                        Commit #{index + 1}
                     </div>
                 </div>
             </div>
