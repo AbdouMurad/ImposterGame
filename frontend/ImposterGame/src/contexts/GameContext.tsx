@@ -13,6 +13,7 @@ const GameContext = createContext({
     problemConstraints: [],
     problemTopics: [],
     problemCode: "",
+    problemTests: [1, 2, 3],
     code: "",
     commits: []
 });
@@ -32,6 +33,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const [problemConstraints, setProblemConstraints] = useState([]);
     const [problemTopics, setProblemTopics] = useState([]);
     const [problemCode, setProblemCode] = useState("");
+    const [problemTests, setProblemTests] = useState([1, 2, 3]);
     const [code, setCode] = useState("");
 
     const [commits, setCommits] = useState([]);
@@ -49,6 +51,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         problemConstraints,
         problemTopics,
         problemCode,
+        problemTests,
         code,
         commits
     }

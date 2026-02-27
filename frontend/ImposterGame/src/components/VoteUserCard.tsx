@@ -11,7 +11,7 @@ export default function UserCard({ username, highlight, handleCardClick }: VoteU
         <>
             <div
                 onClick={() => handleCardClick(username)}
-                className={`flex items-center cursor-pointer text-white mr-5 mt-3 p-3 rounded-r-xl ${Highlight ? "bg-purple-700" : "bg-gray-800"
+                className={`flex items-center cursor-pointer text-white mr-5 mt-3 p-3 rounded-r-xl ${highlight ? "bg-purple-700" : "bg-gray-800"
                     }`}
             >
                 <User className="mr-3" />

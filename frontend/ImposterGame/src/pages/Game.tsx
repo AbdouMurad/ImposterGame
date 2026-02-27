@@ -14,23 +14,12 @@ import { useGame } from "../contexts/GameContext.tsx";
 
 export default function Game() {
     const {
-        roomId,
         username,
     } = useRoom();
 
     const {
         gameState,
-        time,
-        players,
-        currentPlayer,
         imposter,
-        problemTitle,
-        problemDescription,
-        problemExamples,
-        problemConstraints,
-        problemCode,
-        code,
-        commits
     } = useGame();
 
     return (

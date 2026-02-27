@@ -2,13 +2,25 @@ import { useState, useEffect } from "react";
 
 import { GripHorizontal } from "lucide-react";
 
+import TestCard from "./TestCard.tsx";
+
+import { useGame } from "../contexts/GameContext.tsx";
+
 type ConsolePanelProps = {
     height: number;
     onResize: (newHeight: number) => void;
 };
 
 export default function ConsolePanel({ height, onResize }: ConsolePanelProps) {
+    const [highlightedCard, setHighlightedCard] = useState(0);
+
+    const { problemTests } = useGame();
+
     const [isResizing, setIsResizing] = useState(false);
+
+    const handleCardClick = (index: number) => {
+        setHighlightedCard(index)
+    };
 
     const handleMouseDown = () => {
         setIsResizing(true);
@@ -34,7 +46,6 @@ export default function ConsolePanel({ height, onResize }: ConsolePanelProps) {
             window.removeEventListener("mouseup", handleMouseUp);
         }
 
-        // Cleanup event listeners when the component unmounts or `isResizing` changes
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
@@ -44,19 +55,44 @@ export default function ConsolePanel({ height, onResize }: ConsolePanelProps) {
     return (
         <>
             <div
-                className="bg-gray-950 text-gray-200 border-t-2 border-gray-700"
+                className="bg-gray-950 text-gray-200 border-t-2 border-gray-700 overflow-y-auto custom-scrollbar"
                 style={{ height: `${height}px` }}
             >
                 <div
-                    className="flex justify-center cursor-row-resize bg-gray-800 h-1"
+                    className="flex justify-center cursor-row-resize h-1"
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}
                 >
                     <GripHorizontal />
                 </div>
-                <div className="p-3">
-                    <div className="m-2 text-gray-200 text-xl font-bold">
-                        Test Cases
+                <div className="mt-5 mx-5 text-gray-200 text-xl font-bold">
+                    Test Cases
+                </div>
+                <div className="flex">
+                    {problemTests.map((test, index) => (
+                        <div key={index}>
+                            <TestCard index={index} highlight={index === highlightedCard} handleCardClick={handleCardClick} />
+                        </div>
+                    ))}
+                </div>
+                <div className="m-5">
+                    <strong className="text-gray-300">Input:</strong>
+                    <div className="bg-gray-900 p-3 rounded-xl mt-2">
+                        {/* TODO */}
+                    </div>
+                </div>
+
+                <div className="m-5">
+                    <strong className="text-gray-300">Output:</strong>
+                    <div className="bg-gray-900 p-3 rounded-xl mt-2">
+                        {/* TODO */}
+                    </div>
+                </div>
+
+                <div className="m-5">
+                    <strong className="text-gray-300">Expected result:</strong>
+                    <div className="bg-gray-900 p-3 rounded-xl mt-2">
+                        {/* TODO */}
                     </div>
                 </div>
             </div>

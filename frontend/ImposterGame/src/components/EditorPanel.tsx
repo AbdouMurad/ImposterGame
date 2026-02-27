@@ -1,4 +1,3 @@
-import { GitCommitHorizontal } from "lucide-react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 import Editor from "@monaco-editor/react";
@@ -61,7 +60,7 @@ export default function EditorPanel() {
                         )}
                         <div className="flex justify-between border-t-2 border-gray-700">
                             <div
-                                className="text-gray-200 m-3 p-1 rounded-xl cursor-pointer hover:bg-gray-800"
+                                className="text-gray-400 m-3 p-1 rounded-xl cursor-pointer hover:bg-gray-800"
                                 onClick={toggleConsole}
                             >
                                 Console{" "}
